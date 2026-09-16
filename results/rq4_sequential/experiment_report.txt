@@ -1,0 +1,157 @@
+==============================================================================
+RQ4 SEQUENTIAL SAMPLE-SIZE SENSITIVITY ANALYSIS
+==============================================================================
+
+*** THIS IS A FOLLOW-UP / DIAGNOSTIC ANALYSIS, NOT A REPLACEMENT OF RQ4 ***
+The original RQ4 result (results/rq4/, 300 held-out queries) is preserved
+unchanged and is NOT overwritten, rerun, or reinterpreted by this file. This
+analysis exists only to diagnose why that 300-query evaluation saw almost no
+OGMM activity, using the SAME frozen split, SAME frozen SACR mechanism, and
+SAME frozen RQ3 governance parameters -- run at larger, nested query volumes.
+results/rq1, results/rq2, and results/rq3 were verified byte-for-byte
+unchanged before and after this run: True.
+
+## 1. Motivation (recap)
+
+Original RQ4 (300 queries): 0 quarantined, 2 downgraded, 1,354 distinct
+memories touched across 1,374 retrievals (~1.01 retrievals/memory).
+Standalone recurrence analysis (all 20,372 held-out encounters, pre-
+governance): 93,067 retrievals, 50,191 distinct memories, 21.9% of distinct
+memories retrieved >=3 times (RQ3's own N_MIN), max retrieval count 10.
+300 queries is only 1.5% of that volume -- this analysis tests whether a
+larger, sequential evaluation closes that gap.
+
+## 2. Method (see full design documentation in this file's module docstring)
+
+Checkpoints (queries): [300, 1000, 3000, 5000, 10000, 20372]
+Sequence construction: np.random.default_rng(42).permutation(len(held_out_df)) over the full 20,372-row held-out set from experiments_rq4.build_split() (unmodified); prefixes [:N] of this single permutation are used for each checkpoint, guaranteeing nesting. Distinct from and does not call RQ4's own build_eval_queries() (a non-nested, fixed-size random sample).
+Governance state (SG-QMS) and oracle bookkeeping (SACR shadow governance)
+evolve SEQUENTIALLY and CUMULATIVELY across the single, nested query order;
+each checkpoint N reports the state after processing exactly the first N
+queries of that one deterministic sequence -- identical in principle to
+restarting fresh with the first N encounters, computed in one pass for
+efficiency. All governance functions (_new_governance_entry, _apply_feedback,
+_update_quality, _meets_quarantine_criterion, _meets_downgrade_criterion,
+_oracle_eligible_set, _effectiveness_and_false_rate) are imported directly
+from experiments_rq3.py -- no governance logic was reimplemented.
+Frozen params: N_MIN=3 BETA=-0.2 ALPHA=0.1 DOWNGRADE_THRESHOLD=0.4 state_threshold=0.7 context_threshold=0.9 lambda=(0.6,0.25,0.15) top_k=5 candidate_k=100
+Pre-committed decision rules (fixed BEFORE running): 'meaningfully active' = >=5 distinct memories quarantined; 'unacceptable false quarantine' = false_quarantine_rate > 0.5. These thresholds were NOT chosen after seeing the results below, and N was never selected to maximize SG-QMS accuracy.
+
+## 3. Sample-Size Table
+
+[baseline]
+               N accuracy_covered         coverage         macro_f1 total_retrieval_events distinct_memories_retrieved retrieved_exactly_once   retrieved_ge_2   retrieved_ge_3   retrieved_ge_5 max_retrieval_count
+        300.0000           0.5100           1.0000           0.4006        1500.0000        1482.0000        1464.0000          18.0000           0.0000           0.0000           2.0000
+       1000.0000           0.4670           1.0000           0.3461        5000.0000        4826.0000        4661.0000         165.0000           8.0000           0.0000           4.0000
+       3000.0000           0.4690           1.0000           0.3491       15000.0000       13303.0000       11764.0000        1539.0000         146.0000           1.0000           5.0000
+       5000.0000           0.4710           1.0000           0.3553       25000.0000       20665.0000       16978.0000        3687.0000         571.0000           8.0000           6.0000
+      10000.0000           0.4715           1.0000           0.3605       50000.0000       35094.0000       24014.0000       11080.0000        2955.0000         147.0000           7.0000
+      20372.0000           0.4685           1.0000           0.3575      101860.0000       53081.0000       25242.0000       27839.0000       12649.0000        1994.0000          11.0000
+
+[sacr]
+               N accuracy_covered         coverage         macro_f1 total_retrieval_events distinct_memories_retrieved retrieved_exactly_once   retrieved_ge_2   retrieved_ge_3   retrieved_ge_5 max_retrieval_count mean_state_alignment mean_context_alignment state_violations context_violations joint_violations
+        300.0000           0.4692           0.9733           0.3312        1384.0000        1373.0000        1362.0000          11.0000           0.0000           0.0000           2.0000           0.8134           0.9747           0.0000           0.0000           0.0000
+       1000.0000           0.4780           0.9770           0.3441        4608.0000        4450.0000        4299.0000         151.0000           7.0000           0.0000           3.0000           0.8114           0.9745           0.0000           0.0000           0.0000
+       3000.0000           0.4818           0.9700           0.3629       13805.0000       12379.0000       11091.0000        1288.0000         127.0000           0.0000           4.0000           0.8138           0.9744           0.0000           0.0000           0.0000
+       5000.0000           0.4816           0.9692           0.3699       22999.0000       19262.0000       16036.0000        3226.0000         450.0000           7.0000           5.0000           0.8138           0.9740           0.0000           0.0000           0.0000
+      10000.0000           0.4772           0.9656           0.3666       45774.0000       32800.0000       22981.0000        9819.0000        2487.0000         115.0000           7.0000           0.8144           0.9740           0.0000           0.0000           0.0000
+      20372.0000           0.4711           0.9652           0.3595       93067.0000       50191.0000       25058.0000       25133.0000       11007.0000        1603.0000          10.0000           0.8142           0.9739           0.0000           0.0000           0.0000
+
+[sg_qms]
+               N accuracy_covered         coverage         macro_f1 total_retrieval_events distinct_memories_retrieved retrieved_exactly_once   retrieved_ge_2   retrieved_ge_3   retrieved_ge_5 max_retrieval_count mean_state_alignment mean_context_alignment state_violations context_violations joint_violations number_quarantined number_downgraded memory_retention_rate number_reaching_n_min quarantine_effectiveness false_quarantine_rate
+        300.0000           0.4692           0.9733           0.3312        1384.0000        1373.0000        1362.0000          11.0000           0.0000           0.0000           2.0000           0.8134           0.9747           0.0000           0.0000           0.0000           0.0000           1.0000           1.0000           0.0000              N/A              N/A
+       1000.0000           0.4780           0.9770           0.3441        4608.0000        4450.0000        4299.0000         151.0000           7.0000           0.0000           3.0000           0.8114           0.9745           0.0000           0.0000           0.0000           1.0000          19.0000           0.9998           7.0000           1.0000           0.0000
+       3000.0000           0.4818           0.9700           0.3629       13805.0000       12379.0000       11089.0000        1290.0000         127.0000           0.0000           4.0000           0.8138           0.9744           0.0000           0.0000           0.0000          17.0000         139.0000           0.9986         127.0000           1.0000           0.0000
+       5000.0000           0.4816           0.9692           0.3699       22999.0000       19262.0000       16034.0000        3228.0000         451.0000           7.0000           5.0000           0.8138           0.9740           0.0000           0.0000           0.0000          49.0000         348.0000           0.9975         451.0000           1.0000           0.0000
+      10000.0000           0.4784           0.9656           0.3664       45772.0000       32823.0000       22972.0000        9851.0000        2504.0000         101.0000           7.0000           0.8144           0.9739           0.0000           0.0000           0.0000         271.0000        1078.0000           0.9917        2504.0000           1.0000           0.0037
+      20372.0000           0.4744           0.9652           0.3589       93031.0000       50315.0000       24983.0000       25332.0000       11194.0000        1472.0000          10.0000           0.8142           0.9739           0.0000           0.0000           0.0000        1168.0000        2738.0000           0.9768       11194.0000           1.0000           0.0188
+
+
+## 4. Mechanism Exposure vs. Governance Behavior vs. Downstream Performance
+
+(A) MECHANISM EXPOSURE (does the retrieval stream even produce repeats):
+  N=   300: 1373 distinct memories, 0 reach N_MIN=3 (0.0%), max retrieval count 2
+  N=  1000: 4450 distinct memories, 7 reach N_MIN=3 (0.2%), max retrieval count 3
+  N=  3000: 12379 distinct memories, 127 reach N_MIN=3 (1.0%), max retrieval count 4
+  N=  5000: 19262 distinct memories, 451 reach N_MIN=3 (2.3%), max retrieval count 5
+  N= 10000: 32823 distinct memories, 2504 reach N_MIN=3 (7.6%), max retrieval count 7
+  N= 20372: 50315 distinct memories, 11194 reach N_MIN=3 (22.2%), max retrieval count 10
+
+(B) GOVERNANCE BEHAVIOR (does OGMM actually act on that exposure):
+  N=   300: quarantined=0 downgraded=1 retention=1.0000 effectiveness=N/A false_quarantine_rate=N/A
+  N=  1000: quarantined=1 downgraded=19 retention=0.9998 effectiveness=1.0000 false_quarantine_rate=0.0000
+  N=  3000: quarantined=17 downgraded=139 retention=0.9986 effectiveness=1.0000 false_quarantine_rate=0.0000
+  N=  5000: quarantined=49 downgraded=348 retention=0.9975 effectiveness=1.0000 false_quarantine_rate=0.0000
+  N= 10000: quarantined=271 downgraded=1078 retention=0.9917 effectiveness=1.0000 false_quarantine_rate=0.0037
+  N= 20372: quarantined=1168 downgraded=2738 retention=0.9768 effectiveness=1.0000 false_quarantine_rate=0.0188
+
+(C) DOWNSTREAM PREDICTION PERFORMANCE (does any of the above change accuracy):
+  N=   300: baseline_acc=0.5100 sacr_acc=0.4692 sg_qms_acc=0.4692
+  N=  1000: baseline_acc=0.4670 sacr_acc=0.4780 sg_qms_acc=0.4780
+  N=  3000: baseline_acc=0.4690 sacr_acc=0.4818 sg_qms_acc=0.4818
+  N=  5000: baseline_acc=0.4710 sacr_acc=0.4816 sg_qms_acc=0.4816
+  N= 10000: baseline_acc=0.4715 sacr_acc=0.4772 sg_qms_acc=0.4784
+  N= 20372: baseline_acc=0.4685 sacr_acc=0.4711 sg_qms_acc=0.4744
+
+These three axes are reported separately and must not be conflated: mechanism
+exposure growing with N does not by itself mean governance is behaving
+differently, and governance acting more does not by itself mean downstream
+accuracy improves -- each is evaluated on its own evidence above.
+
+## 5. Pre-Committed Decision Outcomes
+
+OGMM first becomes 'meaningfully active' (>= 5 quarantines, threshold fixed before this run) at N = 3000.
+False-quarantine rate stayed at or below the pre-committed 50% unacceptability threshold at every evaluated N.
+
+## 6. Limitations (carried over from RQ3/RQ4, plus new ones specific to this design)
+
+- Outcome-proxy limitation (unchanged from RQ3/RQ4): `readmitted`-derived feedback
+  is an experimental outcome proxy, not causal ground truth.
+- SACR's shadow-governance oracle (used for false-quarantine-rate) reflects SACR's
+  OWN unconstrained retrieval trajectory over this sequence -- as RQ3 itself notes,
+  because SG-QMS's governance changes what it retrieves going forward, its
+  trajectory can diverge from SACR's for reasons beyond the quarantine decision
+  itself. This mirrors RQ3's own static-oracle caveat exactly, not a new gap.
+- The nested full-sequence order (design note (a)) is a NEW, seed-42-based
+  permutation distinct from RQ4's own build_eval_queries() sampling; it was
+  necessary for nesting and is documented, not silently substituted.
+- This is one deterministic query order; a different seed could shift exactly
+  which memories reach N_MIN first, though the aggregate recurrence rate (from
+  the separate, order-independent recurrence analysis) would not be expected to
+  change materially.
+- As in RQ4, majority-vote prediction is a simple, fixed, auditable rule, not
+  claimed optimal; this experiment evaluates an outcome-proxy prediction task,
+  not clinical validity or deployment safety.
+
+## 7. Reproducibility
+
+experiment_id: RQ4SEQ_20260916T022104Z
+timestamp: 2026-09-16T03:30:02.425297+00:00
+python_version: 3.9.23
+platform: macOS-15.6.1-arm64-arm-64bit
+random_seed: 42
+checkpoints: [300, 1000, 3000, 5000, 10000, 20372]
+n_min: 3
+beta: -0.2
+alpha: 0.1
+downgrade_threshold: 0.4
+state_threshold: 0.7
+context_threshold: 0.9
+top_k: 5
+candidate_k: 100
+elapsed_seconds_total: 4138.082458019257
+
+Safety checks:
+  regression_checks_passed: True
+  protected_dirs_unchanged: {'rq1': True, 'rq2': True, 'rq3': True}
+  all_protected_dirs_unchanged: True
+  rq3_frozen_params_verified: True
+  rq2_thresholds_verified: True
+
+## 8. Conclusion
+
+This analysis reports where natural recurrence becomes large enough to expose
+OGMM's governance mechanism at all, and separately whether that mechanism, once
+exposed, changes downstream prediction behavior. It does not select or endorse a
+final RQ4 evaluation size on the basis of maximizing any single outcome metric;
+that choice is left to the accompanying human-written recommendation.

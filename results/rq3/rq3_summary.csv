@@ -1,0 +1,4 @@
+condition,total_retrieval_events,distinct_memories_touched,negative_retrieval_rate_overall,negative_retrieval_rate_first_half,negative_retrieval_rate_second_half,memory_retention_vs_touched,memory_retention_vs_full_bank,number_flagged,number_downgraded,quarantine_or_deletion_effectiveness,false_quarantine_or_deletion_rate,negative_evidence_accumulation,quality_score_mean_after
+static,1500,100,0.13,0.13066666666666665,0.12933333333333333,1.0,1.0,0,,,,,
+history_deletion,1488,116,0.034274193548387094,0.06702412868632708,0.0013477088948787063,0.853448275862069,0.9998329501012125,17,,1.0,0.23529411764705882,17.0,
+ogmm,1488,116,0.034274193548387094,0.06702412868632708,0.0013477088948787063,0.853448275862069,0.9998329501012125,17,17.0,1.0,0.23529411764705882,17.0,0.7275862068965516

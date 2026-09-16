@@ -1,0 +1,32 @@
+experiment_id: RQ2_20260914T170830Z
+timestamp: 2026-09-14T17:08:38.386319+00:00
+python_version: 3.9.23
+git_commit: e4753fd
+random_seed: 42
+dataset_shape: [101766, 22]
+number_of_memory_records: 101766
+state_cols: ['age', 'gender', 'race', 'number_outpatient', 'number_emergency', 'number_inpatient', 'number_diagnoses']
+context_cols: ['admission_type_id', 'admission_source_id', 'time_in_hospital', 'medical_specialty', 'num_lab_procedures', 'num_procedures', 'num_medications']
+experience_cols: ['insulin', 'change', 'diabetesMed']
+state_alignment_threshold: 0.7
+context_alignment_threshold: 0.9 (primary)
+lambda_semantic: 0.6
+lambda_context: 0.25
+lambda_experience: 0.15
+candidate_k: 100
+top_k: 5
+number_of_query_scenarios: 20
+number_of_query_instances: 40
+
+S_context empirical distribution (top-candidate_k semantic pool, all 40 query instances):
+  count: 4000
+  mean: 0.8732867951863659
+  median: 0.919695110868775
+  std: 0.11743549876621188
+  min: 0.47515623689287817
+  max: 1.0
+  p10: 0.6732021922098258
+  p25: 0.8110005452562704
+  p50: 0.919695110868775
+  p75: 0.9639449291166847
+  p90: 0.9811613958560523

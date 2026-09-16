@@ -1,0 +1,182 @@
+{
+  "purpose": "Feasibility gate for a proposed RQ4 'recurring state group' protocol: measures natural recurrence in the held-out population under the frozen SACR state representation, before any new protocol code is written.",
+  "inputs": {
+    "state_cols": [
+      "age",
+      "gender",
+      "race",
+      "number_outpatient",
+      "number_emergency",
+      "number_inpatient",
+      "number_diagnoses"
+    ],
+    "state_alignment_threshold": 0.7,
+    "held_out_fraction": 0.2,
+    "random_seed": 42
+  },
+  "split_info": {
+    "total_unique_patients": 71518,
+    "memory_pool_patients": 57214,
+    "heldout_patients": 14304,
+    "memory_pool_rows": 81394,
+    "heldout_rows": 20372,
+    "seed": 42,
+    "heldout_fraction_target": 0.2,
+    "memory_pool_class_distribution": {
+      "NO": 43902,
+      ">30": 28390,
+      "<30": 9102
+    },
+    "heldout_class_distribution": {
+      "NO": 10962,
+      ">30": 7155,
+      "<30": 2255
+    }
+  },
+  "exact_state_groups": {
+    "number_of_groups": 2175,
+    "number_of_singleton_groups": 1217,
+    "groups_with_ge_2": 958,
+    "groups_with_ge_3": 631,
+    "groups_with_ge_5": 403,
+    "groups_with_ge_10": 219,
+    "largest_group_size": 555,
+    "mean_group_size": 6.576551724137931,
+    "median_group_size": 1.0,
+    "patients_in_groups_ge_3": 12433,
+    "patients_in_groups_ge_5": 11672,
+    "top_20_group_sizes": [
+      555,
+      485,
+      450,
+      416,
+      353,
+      316,
+      269,
+      206,
+      142,
+      137,
+      127,
+      122,
+      121,
+      114,
+      107,
+      106,
+      106,
+      106,
+      104,
+      103
+    ]
+  },
+  "threshold_state_groups": {
+    "sample_size": 3000,
+    "sample_seed": 42,
+    "threshold_used": 0.7,
+    "number_of_components": 1,
+    "components_with_ge_3": 1,
+    "components_with_ge_5": 1,
+    "largest_component_size": 3000,
+    "largest_component_fraction_of_sample": 1.0,
+    "top_10_component_sizes": [
+      3000
+    ]
+  },
+  "state_similarity_distribution": {
+    "nearest_neighbor_similarity_min": 0.8503401875495911,
+    "nearest_neighbor_similarity_p25": 1.0,
+    "nearest_neighbor_similarity_median": 1.0,
+    "nearest_neighbor_similarity_p75": 1.0,
+    "nearest_neighbor_similarity_max": 1.0,
+    "fraction_with_a_neighbor_ge_threshold": 1.0,
+    "random_pair_similarity_sample_mean": 0.735812019435068,
+    "random_pair_similarity_sample_median": 0.7074829936027527,
+    "random_pair_similarity_histogram_counts": [
+      0,
+      0,
+      0,
+      0,
+      19,
+      1897,
+      3104,
+      2304,
+      3933,
+      743
+    ],
+    "random_pair_similarity_histogram_bin_edges": [
+      0.0,
+      0.1,
+      0.2,
+      0.3,
+      0.4,
+      0.5,
+      0.6,
+      0.7,
+      0.8,
+      0.9,
+      1.0
+    ]
+  },
+  "sacr_memory_overlap_check": {
+    "groups_probed": 40,
+    "member_cap_per_group": 5,
+    "within_group_jaccard_mean": 0.0007010164738871363,
+    "within_group_jaccard_median": 0.0,
+    "within_group_pair_count": 317,
+    "cross_group_baseline_jaccard_mean": 0.0,
+    "cross_group_baseline_jaccard_median": 0.0,
+    "cross_group_baseline_pair_count": 200,
+    "sample_group_details": [
+      {
+        "group_size": 3,
+        "members_probed": 3,
+        "mean_pairwise_jaccard": 0.0
+      },
+      {
+        "group_size": 4,
+        "members_probed": 4,
+        "mean_pairwise_jaccard": 0.0
+      },
+      {
+        "group_size": 5,
+        "members_probed": 5,
+        "mean_pairwise_jaccard": 0.01111111111111111
+      },
+      {
+        "group_size": 10,
+        "members_probed": 5,
+        "mean_pairwise_jaccard": 0.01111111111111111
+      },
+      {
+        "group_size": 4,
+        "members_probed": 4,
+        "mean_pairwise_jaccard": 0.0
+      },
+      {
+        "group_size": 3,
+        "members_probed": 3,
+        "mean_pairwise_jaccard": 0.0
+      },
+      {
+        "group_size": 66,
+        "members_probed": 5,
+        "mean_pairwise_jaccard": 0.0
+      },
+      {
+        "group_size": 12,
+        "members_probed": 5,
+        "mean_pairwise_jaccard": 0.0
+      },
+      {
+        "group_size": 3,
+        "members_probed": 3,
+        "mean_pairwise_jaccard": 0.0
+      },
+      {
+        "group_size": 3,
+        "members_probed": 3,
+        "mean_pairwise_jaccard": 0.0
+      }
+    ]
+  },
+  "verdict": "CAUTION: many exact state groups exist, but group membership does not translate into overlapping SACR retrieval sets versus a cross-group baseline. A recurring-state-group protocol would be recurring in state only, not in memory -- revisit the group definition (e.g. use context-aligned or threshold groups) before implementing RQ4."
+}

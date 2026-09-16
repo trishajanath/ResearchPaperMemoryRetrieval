@@ -1,0 +1,54 @@
+RQ4 RECURRING-STATE-GROUP FEASIBILITY ANALYSIS (analysis-only, no new protocol code)
+========================================================================================
+Held-out patients: 14304 (of 71518 total)
+State definition: STATE_COLS=['age', 'gender', 'race', 'number_outpatient', 'number_emergency', 'number_inpatient', 'number_diagnoses'], frozen threshold=0.7
+
+-- EXACT state groups (identical STATE_COLS tuple) --
+  number_of_groups: 2175
+  number_of_singleton_groups: 1217
+  groups_with_ge_2: 958
+  groups_with_ge_3: 631
+  groups_with_ge_5: 403
+  groups_with_ge_10: 219
+  largest_group_size: 555
+  mean_group_size: 6.576551724137931
+  median_group_size: 1.0
+  patients_in_groups_ge_3: 12433
+  patients_in_groups_ge_5: 11672
+  top_20_group_sizes: [555, 485, 450, 416, 353, 316, 269, 206, 142, 137, 127, 122, 121, 114, 107, 106, 106, 106, 104, 103]
+
+-- THRESHOLD state groups (frozen state_alignment >= threshold, bounded sample) --
+  sample_size: 3000
+  sample_seed: 42
+  threshold_used: 0.7
+  number_of_components: 1
+  components_with_ge_3: 1
+  components_with_ge_5: 1
+  largest_component_size: 3000
+  largest_component_fraction_of_sample: 1.0
+  top_10_component_sizes: [3000]
+
+-- State similarity distribution (bounded sample) --
+  nearest_neighbor_similarity_min: 0.8503401875495911
+  nearest_neighbor_similarity_p25: 1.0
+  nearest_neighbor_similarity_median: 1.0
+  nearest_neighbor_similarity_p75: 1.0
+  nearest_neighbor_similarity_max: 1.0
+  fraction_with_a_neighbor_ge_threshold: 1.0
+  random_pair_similarity_sample_mean: 0.735812019435068
+  random_pair_similarity_sample_median: 0.7074829936027527
+  random_pair_similarity_histogram_counts: [0, 0, 0, 0, 19, 1897, 3104, 2304, 3933, 743]
+  random_pair_similarity_histogram_bin_edges: [np.float64(0.0), np.float64(0.1), np.float64(0.2), np.float64(0.3), np.float64(0.4), np.float64(0.5), np.float64(0.6), np.float64(0.7), np.float64(0.8), np.float64(0.9), np.float64(1.0)]
+
+-- Do EXACT groups also produce repeated SACR memories? --
+  groups_probed: 40
+  member_cap_per_group: 5
+  within_group_jaccard_mean: 0.0007010164738871363
+  within_group_jaccard_median: 0.0
+  within_group_pair_count: 317
+  cross_group_baseline_jaccard_mean: 0.0
+  cross_group_baseline_jaccard_median: 0.0
+  cross_group_baseline_pair_count: 200
+
+VERDICT
+CAUTION: many exact state groups exist, but group membership does not translate into overlapping SACR retrieval sets versus a cross-group baseline. A recurring-state-group protocol would be recurring in state only, not in memory -- revisit the group definition (e.g. use context-aligned or threshold groups) before implementing RQ4.

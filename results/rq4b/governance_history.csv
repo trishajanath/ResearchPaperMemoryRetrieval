@@ -1,0 +1,270 @@
+memory_id,retrieval_count,positive_feedback_count,neutral_feedback_count,negative_feedback_count,average_utility,quality_score,quarantined,quarantine_reason,downgraded
+M096716,20,0,20,0,0.0,0.5,False,,False
+M074810,20,0,20,0,0.0,0.5,False,,False
+M046527,20,0,20,0,0.0,0.5,False,,False
+M091704,3,0,0,3,-1.0,0.20000000000000004,True,retrieval_count=3>=N_MIN=3 and average_utility=-1.0000<=BETA=-0.2,True
+M097894,3,0,0,3,-1.0,0.20000000000000004,True,retrieval_count=3>=N_MIN=3 and average_utility=-1.0000<=BETA=-0.2,True
+M059928,20,20,0,0,1.0,1.0,False,,False
+M014054,20,0,20,0,0.0,0.5,False,,False
+M004699,20,20,0,0,1.0,1.0,False,,False
+M021029,20,20,0,0,1.0,1.0,False,,False
+M074720,20,0,20,0,0.0,0.5,False,,False
+M081470,20,0,20,0,0.0,0.5,False,,False
+M089987,20,20,0,0,1.0,1.0,False,,False
+M076341,20,0,20,0,0.0,0.5,False,,False
+M039466,20,0,20,0,0.0,0.5,False,,False
+M078250,20,0,20,0,0.0,0.5,False,,False
+M019590,20,20,0,0,1.0,1.0,False,,False
+M012656,20,0,20,0,0.0,0.5,False,,False
+M096948,20,20,0,0,1.0,1.0,False,,False
+M101377,3,0,0,3,-1.0,0.20000000000000004,True,retrieval_count=3>=N_MIN=3 and average_utility=-1.0000<=BETA=-0.2,True
+M066238,20,20,0,0,1.0,1.0,False,,False
+M065421,20,0,20,0,0.0,0.5,False,,False
+M073699,20,20,0,0,1.0,1.0,False,,False
+M079651,20,0,20,0,0.0,0.5,False,,False
+M023870,20,20,0,0,1.0,1.0,False,,False
+M081379,20,20,0,0,1.0,1.0,False,,False
+M060707,20,0,20,0,0.0,0.5,False,,False
+M085556,20,20,0,0,1.0,1.0,False,,False
+M085098,20,20,0,0,1.0,1.0,False,,False
+M002623,20,20,0,0,1.0,1.0,False,,False
+M054899,20,0,20,0,0.0,0.5,False,,False
+M005093,20,20,0,0,1.0,1.0,False,,False
+M011337,20,20,0,0,1.0,1.0,False,,False
+M014126,20,20,0,0,1.0,1.0,False,,False
+M008767,20,20,0,0,1.0,1.0,False,,False
+M066676,3,0,0,3,-1.0,0.20000000000000004,True,retrieval_count=3>=N_MIN=3 and average_utility=-1.0000<=BETA=-0.2,True
+M087131,20,0,20,0,0.0,0.5,False,,False
+M063515,20,0,20,0,0.0,0.5,False,,False
+M062090,20,0,20,0,0.0,0.5,False,,False
+M066360,20,0,20,0,0.0,0.5,False,,False
+M034312,20,20,0,0,1.0,1.0,False,,False
+M032439,20,20,0,0,1.0,1.0,False,,False
+M045296,20,20,0,0,1.0,1.0,False,,False
+M035634,20,20,0,0,1.0,1.0,False,,False
+M019962,20,0,20,0,0.0,0.5,False,,False
+M049140,20,20,0,0,1.0,1.0,False,,False
+M017365,20,20,0,0,1.0,1.0,False,,False
+M020285,20,20,0,0,1.0,1.0,False,,False
+M061181,20,20,0,0,1.0,1.0,False,,False
+M024699,3,0,0,3,-1.0,0.20000000000000004,True,retrieval_count=3>=N_MIN=3 and average_utility=-1.0000<=BETA=-0.2,True
+M012057,20,20,0,0,1.0,1.0,False,,False
+M096093,20,20,0,0,1.0,1.0,False,,False
+M072663,20,20,0,0,1.0,1.0,False,,False
+M001175,20,0,20,0,0.0,0.5,False,,False
+M057255,20,20,0,0,1.0,1.0,False,,False
+M036373,20,20,0,0,1.0,1.0,False,,False
+M035557,20,20,0,0,1.0,1.0,False,,False
+M027211,20,20,0,0,1.0,1.0,False,,False
+M030673,20,20,0,0,1.0,1.0,False,,False
+M036529,20,20,0,0,1.0,1.0,False,,False
+M050610,20,20,0,0,1.0,1.0,False,,False
+M006985,3,0,0,3,-1.0,0.20000000000000004,True,retrieval_count=3>=N_MIN=3 and average_utility=-1.0000<=BETA=-0.2,True
+M004720,20,0,20,0,0.0,0.5,False,,False
+M014636,20,20,0,0,1.0,1.0,False,,False
+M075601,20,20,0,0,1.0,1.0,False,,False
+M066521,20,0,20,0,0.0,0.5,False,,False
+M098720,20,20,0,0,1.0,1.0,False,,False
+M057017,20,0,20,0,0.0,0.5,False,,False
+M054910,20,0,20,0,0.0,0.5,False,,False
+M071700,20,20,0,0,1.0,1.0,False,,False
+M002218,20,20,0,0,1.0,1.0,False,,False
+M010262,3,0,0,3,-1.0,0.20000000000000004,True,retrieval_count=3>=N_MIN=3 and average_utility=-1.0000<=BETA=-0.2,True
+M015357,20,0,20,0,0.0,0.5,False,,False
+M074733,20,20,0,0,1.0,1.0,False,,False
+M019221,20,0,20,0,0.0,0.5,False,,False
+M093969,3,0,0,3,-1.0,0.20000000000000004,True,retrieval_count=3>=N_MIN=3 and average_utility=-1.0000<=BETA=-0.2,True
+M083379,20,20,0,0,1.0,1.0,False,,False
+M082664,20,0,20,0,0.0,0.5,False,,False
+M094551,20,20,0,0,1.0,1.0,False,,False
+M101647,20,0,20,0,0.0,0.5,False,,False
+M038744,20,20,0,0,1.0,1.0,False,,False
+M057240,20,20,0,0,1.0,1.0,False,,False
+M034777,20,0,20,0,0.0,0.5,False,,False
+M041599,3,0,0,3,-1.0,0.20000000000000004,True,retrieval_count=3>=N_MIN=3 and average_utility=-1.0000<=BETA=-0.2,True
+M087689,20,0,20,0,0.0,0.5,False,,False
+M079495,20,20,0,0,1.0,1.0,False,,False
+M097121,3,0,0,3,-1.0,0.20000000000000004,True,retrieval_count=3>=N_MIN=3 and average_utility=-1.0000<=BETA=-0.2,True
+M035729,20,20,0,0,1.0,1.0,False,,False
+M079588,20,20,0,0,1.0,1.0,False,,False
+M092117,20,20,0,0,1.0,1.0,False,,False
+M019204,20,20,0,0,1.0,1.0,False,,False
+M043291,3,0,0,3,-1.0,0.20000000000000004,True,retrieval_count=3>=N_MIN=3 and average_utility=-1.0000<=BETA=-0.2,True
+M003838,20,0,20,0,0.0,0.5,False,,False
+M002712,20,20,0,0,1.0,1.0,False,,False
+M045109,20,20,0,0,1.0,1.0,False,,False
+M005268,20,20,0,0,1.0,1.0,False,,False
+M033350,20,20,0,0,1.0,1.0,False,,False
+M008348,20,20,0,0,1.0,1.0,False,,False
+M028341,20,20,0,0,1.0,1.0,False,,False
+M003427,20,0,20,0,0.0,0.5,False,,False
+M044439,20,20,0,0,1.0,1.0,False,,False
+M073987,20,20,0,0,1.0,1.0,False,,False
+M019110,20,20,0,0,1.0,1.0,False,,False
+M067565,20,20,0,0,1.0,1.0,False,,False
+M074295,3,0,0,3,-1.0,0.20000000000000004,True,retrieval_count=3>=N_MIN=3 and average_utility=-1.0000<=BETA=-0.2,True
+M012291,20,20,0,0,1.0,1.0,False,,False
+M000051,20,0,20,0,0.0,0.5,False,,False
+M008018,3,0,0,3,-1.0,0.20000000000000004,True,retrieval_count=3>=N_MIN=3 and average_utility=-1.0000<=BETA=-0.2,True
+M006210,20,20,0,0,1.0,1.0,False,,False
+M006231,20,20,0,0,1.0,1.0,False,,False
+M021304,20,0,20,0,0.0,0.5,False,,False
+M009819,20,20,0,0,1.0,1.0,False,,False
+M021610,20,0,20,0,0.0,0.5,False,,False
+M013031,20,20,0,0,1.0,1.0,False,,False
+M043601,3,0,0,3,-1.0,0.20000000000000004,True,retrieval_count=3>=N_MIN=3 and average_utility=-1.0000<=BETA=-0.2,True
+M097732,20,0,20,0,0.0,0.5,False,,False
+M062759,3,0,0,3,-1.0,0.20000000000000004,True,retrieval_count=3>=N_MIN=3 and average_utility=-1.0000<=BETA=-0.2,True
+M064303,20,0,20,0,0.0,0.5,False,,False
+M091444,3,0,0,3,-1.0,0.20000000000000004,True,retrieval_count=3>=N_MIN=3 and average_utility=-1.0000<=BETA=-0.2,True
+M037809,20,0,20,0,0.0,0.5,False,,False
+M041267,3,0,0,3,-1.0,0.20000000000000004,True,retrieval_count=3>=N_MIN=3 and average_utility=-1.0000<=BETA=-0.2,True
+M079965,20,20,0,0,1.0,1.0,False,,False
+M069882,20,20,0,0,1.0,1.0,False,,False
+M055973,20,0,20,0,0.0,0.5,False,,False
+M002152,20,0,20,0,0.0,0.5,False,,False
+M005182,20,20,0,0,1.0,1.0,False,,False
+M012946,20,0,20,0,0.0,0.5,False,,False
+M005640,20,0,20,0,0.0,0.5,False,,False
+M004959,20,20,0,0,1.0,1.0,False,,False
+M043743,20,20,0,0,1.0,1.0,False,,False
+M065514,20,20,0,0,1.0,1.0,False,,False
+M045607,20,20,0,0,1.0,1.0,False,,False
+M002651,20,20,0,0,1.0,1.0,False,,False
+M058567,20,20,0,0,1.0,1.0,False,,False
+M002285,20,0,20,0,0.0,0.5,False,,False
+M015871,20,20,0,0,1.0,1.0,False,,False
+M002344,20,20,0,0,1.0,1.0,False,,False
+M031351,20,0,20,0,0.0,0.5,False,,False
+M009019,20,20,0,0,1.0,1.0,False,,False
+M093850,20,0,20,0,0.0,0.5,False,,False
+M045544,20,20,0,0,1.0,1.0,False,,False
+M081475,20,20,0,0,1.0,1.0,False,,False
+M090975,20,20,0,0,1.0,1.0,False,,False
+M045205,3,0,0,3,-1.0,0.20000000000000004,True,retrieval_count=3>=N_MIN=3 and average_utility=-1.0000<=BETA=-0.2,True
+M057338,20,0,20,0,0.0,0.5,False,,False
+M100489,20,20,0,0,1.0,1.0,False,,False
+M089870,20,20,0,0,1.0,1.0,False,,False
+M022557,20,20,0,0,1.0,1.0,False,,False
+M069375,3,0,0,3,-1.0,0.20000000000000004,True,retrieval_count=3>=N_MIN=3 and average_utility=-1.0000<=BETA=-0.2,True
+M060584,20,0,20,0,0.0,0.5,False,,False
+M071307,20,20,0,0,1.0,1.0,False,,False
+M083520,20,0,20,0,0.0,0.5,False,,False
+M066999,20,20,0,0,1.0,1.0,False,,False
+M076530,20,0,20,0,0.0,0.5,False,,False
+M011668,20,0,20,0,0.0,0.5,False,,False
+M006137,20,0,20,0,0.0,0.5,False,,False
+M023445,20,20,0,0,1.0,1.0,False,,False
+M002365,20,20,0,0,1.0,1.0,False,,False
+M033194,20,20,0,0,1.0,1.0,False,,False
+M030498,20,0,20,0,0.0,0.5,False,,False
+M082689,20,20,0,0,1.0,1.0,False,,False
+M027614,20,0,20,0,0.0,0.5,False,,False
+M060006,20,20,0,0,1.0,1.0,False,,False
+M033598,20,20,0,0,1.0,1.0,False,,False
+M092666,20,20,0,0,1.0,1.0,False,,False
+M085177,20,20,0,0,1.0,1.0,False,,False
+M043256,20,0,20,0,0.0,0.5,False,,False
+M090587,20,20,0,0,1.0,1.0,False,,False
+M097981,20,20,0,0,1.0,1.0,False,,False
+M072083,20,20,0,0,1.0,1.0,False,,False
+M072163,3,0,0,3,-1.0,0.20000000000000004,True,retrieval_count=3>=N_MIN=3 and average_utility=-1.0000<=BETA=-0.2,True
+M057476,20,20,0,0,1.0,1.0,False,,False
+M019241,20,20,0,0,1.0,1.0,False,,False
+M046336,20,20,0,0,1.0,1.0,False,,False
+M045002,3,0,0,3,-1.0,0.20000000000000004,True,retrieval_count=3>=N_MIN=3 and average_utility=-1.0000<=BETA=-0.2,True
+M068277,20,0,20,0,0.0,0.5,False,,False
+M063785,20,0,20,0,0.0,0.5,False,,False
+M090625,3,0,0,3,-1.0,0.20000000000000004,True,retrieval_count=3>=N_MIN=3 and average_utility=-1.0000<=BETA=-0.2,True
+M025732,20,20,0,0,1.0,1.0,False,,False
+M077190,20,20,0,0,1.0,1.0,False,,False
+M079288,20,0,20,0,0.0,0.5,False,,False
+M044005,3,0,0,3,-1.0,0.20000000000000004,True,retrieval_count=3>=N_MIN=3 and average_utility=-1.0000<=BETA=-0.2,True
+M039218,3,0,0,3,-1.0,0.20000000000000004,True,retrieval_count=3>=N_MIN=3 and average_utility=-1.0000<=BETA=-0.2,True
+M020214,20,20,0,0,1.0,1.0,False,,False
+M016478,20,0,20,0,0.0,0.5,False,,False
+M072940,20,0,20,0,0.0,0.5,False,,False
+M051994,20,0,20,0,0.0,0.5,False,,False
+M046643,20,20,0,0,1.0,1.0,False,,False
+M012675,20,20,0,0,1.0,1.0,False,,False
+M076504,20,0,20,0,0.0,0.5,False,,False
+M060183,20,20,0,0,1.0,1.0,False,,False
+M088768,20,20,0,0,1.0,1.0,False,,False
+M072455,20,0,20,0,0.0,0.5,False,,False
+M085762,20,0,20,0,0.0,0.5,False,,False
+M084860,20,20,0,0,1.0,1.0,False,,False
+M101256,20,20,0,0,1.0,1.0,False,,False
+M079216,20,0,20,0,0.0,0.5,False,,False
+M076230,20,0,20,0,0.0,0.5,False,,False
+M072410,20,20,0,0,1.0,1.0,False,,False
+M087118,20,20,0,0,1.0,1.0,False,,False
+M078654,20,20,0,0,1.0,1.0,False,,False
+M063842,20,20,0,0,1.0,1.0,False,,False
+M004966,20,0,20,0,0.0,0.5,False,,False
+M039163,20,0,20,0,0.0,0.5,False,,False
+M042819,20,20,0,0,1.0,1.0,False,,False
+M077241,20,20,0,0,1.0,1.0,False,,False
+M036615,20,20,0,0,1.0,1.0,False,,False
+M094093,20,20,0,0,1.0,1.0,False,,False
+M069427,20,20,0,0,1.0,1.0,False,,False
+M026618,20,20,0,0,1.0,1.0,False,,False
+M004156,3,0,0,3,-1.0,0.20000000000000004,True,retrieval_count=3>=N_MIN=3 and average_utility=-1.0000<=BETA=-0.2,True
+M016902,20,0,20,0,0.0,0.5,False,,False
+M008422,20,20,0,0,1.0,1.0,False,,False
+M030399,20,20,0,0,1.0,1.0,False,,False
+M035217,20,20,0,0,1.0,1.0,False,,False
+M026531,20,0,20,0,0.0,0.5,False,,False
+M050793,20,20,0,0,1.0,1.0,False,,False
+M085802,20,20,0,0,1.0,1.0,False,,False
+M015844,3,0,0,3,-1.0,0.20000000000000004,True,retrieval_count=3>=N_MIN=3 and average_utility=-1.0000<=BETA=-0.2,True
+M086749,20,20,0,0,1.0,1.0,False,,False
+M069310,20,20,0,0,1.0,1.0,False,,False
+M069407,20,20,0,0,1.0,1.0,False,,False
+M074603,20,0,20,0,0.0,0.5,False,,False
+M047666,20,0,20,0,0.0,0.5,False,,False
+M034341,20,0,20,0,0.0,0.5,False,,False
+M034958,20,20,0,0,1.0,1.0,False,,False
+M026984,20,20,0,0,1.0,1.0,False,,False
+M027577,20,20,0,0,1.0,1.0,False,,False
+M032476,20,20,0,0,1.0,1.0,False,,False
+M070878,20,20,0,0,1.0,1.0,False,,False
+M068844,20,20,0,0,1.0,1.0,False,,False
+M066801,20,20,0,0,1.0,1.0,False,,False
+M060900,20,0,20,0,0.0,0.5,False,,False
+M093677,20,20,0,0,1.0,1.0,False,,False
+M019344,20,0,20,0,0.0,0.5,False,,False
+M029769,20,20,0,0,1.0,1.0,False,,False
+M024445,20,0,20,0,0.0,0.5,False,,False
+M032569,20,20,0,0,1.0,1.0,False,,False
+M027936,20,20,0,0,1.0,1.0,False,,False
+M071766,20,20,0,0,1.0,1.0,False,,False
+M043700,20,0,20,0,0.0,0.5,False,,False
+M082130,20,20,0,0,1.0,1.0,False,,False
+M059950,20,0,20,0,0.0,0.5,False,,False
+M079572,3,0,0,3,-1.0,0.20000000000000004,True,retrieval_count=3>=N_MIN=3 and average_utility=-1.0000<=BETA=-0.2,True
+M048959,17,0,17,0,0.0,0.5,False,,False
+M072179,17,0,17,0,0.0,0.5,False,,False
+M010855,17,17,0,0,1.0,1.0,False,,False
+M052502,3,0,0,3,-1.0,0.20000000000000004,True,retrieval_count=3>=N_MIN=3 and average_utility=-1.0000<=BETA=-0.2,True
+M031450,17,17,0,0,1.0,1.0,False,,False
+M045020,17,17,0,0,1.0,1.0,False,,False
+M010430,17,0,17,0,0.0,0.5,False,,False
+M016813,17,0,17,0,0.0,0.5,False,,False
+M062886,17,0,17,0,0.0,0.5,False,,False
+M009065,17,0,17,0,0.0,0.5,False,,False
+M032836,17,0,17,0,0.0,0.5,False,,False
+M092354,17,0,17,0,0.0,0.5,False,,False
+M038944,17,0,17,0,0.0,0.5,False,,False
+M039462,17,0,17,0,0.0,0.5,False,,False
+M054991,17,17,0,0,1.0,1.0,False,,False
+M093109,17,17,0,0,1.0,1.0,False,,False
+M014132,17,0,17,0,0.0,0.5,False,,False
+M020223,17,17,0,0,1.0,1.0,False,,False
+M048957,17,17,0,0,1.0,1.0,False,,False
+M095486,17,0,17,0,0.0,0.5,False,,False
+M090145,17,17,0,0,1.0,1.0,False,,False
+M073168,17,17,0,0,1.0,1.0,False,,False
+M035986,17,17,0,0,1.0,1.0,False,,False
+M049976,17,0,17,0,0.0,0.5,False,,False
+M082359,17,17,0,0,1.0,1.0,False,,False
+M077088,14,0,14,0,0.0,0.5,False,,False

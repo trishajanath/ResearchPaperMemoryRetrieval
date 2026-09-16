@@ -1,0 +1,14 @@
+# Virtual environment
+myenv/
+
+# Regenerable data caches (large binaries; recreated by preprocess.py / baseline_rag.py / experiments_rq4.py)
+data/*.pkl
+data/*.npy
+
+# Python
+__pycache__/
+*.pyc
+
+# Local tool/runtime state
+.claude/
+.DS_Store

@@ -1,0 +1,8 @@
+context_threshold,pct_context_passing_overall,n_context_passing_overall,n_context_samples_overall,min_joint_eligible_per_query,mean_joint_eligible_per_query,n_query_instances_below_top_k,n_query_instances_total,sufficient_for_top_k_all_queries
+0.5,99.9,3996,4000,17,48.675,0,40,True
+0.6,96.0,3840,4000,17,46.825,0,40,True
+0.7,87.75,3510,4000,10,43.975,0,40,True
+0.75,85.2,3408,4000,9,43.025,0,40,True
+0.8,77.7,3108,4000,8,39.8,0,40,True
+0.85,65.85,2634,4000,7,34.625,0,40,True
+0.9,57.3,2292,4000,5,30.775,0,40,True

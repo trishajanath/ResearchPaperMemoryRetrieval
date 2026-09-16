@@ -1,0 +1,13 @@
+comparison,metric,test,statistic_or_discordant_pairs,p_value,effect_size,n,note
+sacr_vs_baseline,accuracy_covered,McNemar (exact binomial on discordant pairs),"a_only=513, b_only=508, n_discordant=1021",0.900386245854838,,1021,
+sacr_vs_baseline,negative_memory_fraction,Wilcoxon signed-rank (paired),379841.0,5.508731276947075e-05,-0.12069262866700234,2910,matched-pairs rank-biserial r; NaN if all paired differences are zero
+sacr_vs_baseline,mean_state_alignment,Wilcoxon signed-rank (paired),145606.0,0.0,0.9307701268290364,2910,matched-pairs rank-biserial r; NaN if all paired differences are zero
+sacr_vs_baseline,mean_context_alignment,Wilcoxon signed-rank (paired),187150.5,0.0,0.9113843675623616,2910,matched-pairs rank-biserial r; NaN if all paired differences are zero
+sg_qms_vs_sacr,accuracy_covered,McNemar (exact binomial on discordant pairs),"a_only=0, b_only=0, n_discordant=0",,,0,"undefined (NaN) when n_discordant=0 -- no evidence of difference, not manufactured significance"
+sg_qms_vs_sacr,negative_memory_fraction,Wilcoxon signed-rank (paired),0.0,0.31731050786291415,-1.0,2910,matched-pairs rank-biserial r; NaN if all paired differences are zero
+sg_qms_vs_sacr,mean_state_alignment,Wilcoxon signed-rank (paired),0.0,0.17971249487899976,-1.0,2910,matched-pairs rank-biserial r; NaN if all paired differences are zero
+sg_qms_vs_sacr,mean_context_alignment,Wilcoxon signed-rank (paired),0.0,0.31731050786291415,1.0,2910,matched-pairs rank-biserial r; NaN if all paired differences are zero
+sg_qms_vs_baseline,accuracy_covered,McNemar (exact binomial on discordant pairs),"a_only=513, b_only=508, n_discordant=1021",0.900386245854838,,1021,
+sg_qms_vs_baseline,negative_memory_fraction,Wilcoxon signed-rank (paired),378956.0,5.013170510989211e-05,-0.12140508044482004,2910,matched-pairs rank-biserial r; NaN if all paired differences are zero
+sg_qms_vs_baseline,mean_state_alignment,Wilcoxon signed-rank (paired),145691.5,0.0,0.9307294749729582,2910,matched-pairs rank-biserial r; NaN if all paired differences are zero
+sg_qms_vs_baseline,mean_context_alignment,Wilcoxon signed-rank (paired),187148.5,0.0,0.9113853145609797,2910,matched-pairs rank-biserial r; NaN if all paired differences are zero

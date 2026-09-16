@@ -1,0 +1,10 @@
+metric,value
+mean baseline state alignment,0.7794980307912639
+mean SACR state alignment,0.8529773540995347
+mean alignment improvement,0.07347932330827071
+total baseline misaligned memories,77.0
+total SACR misaligned memories,0.0
+mean baseline shift drop,0.013130325814536315
+mean SACR shift drop,-0.0025648048693161286
+number of queries where SACR has higher alignment,37.0
+number of queries where SACR has fewer misaligned memories,35.0

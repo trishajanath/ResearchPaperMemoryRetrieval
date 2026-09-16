@@ -1,0 +1,247 @@
+==============================================================================
+PROFESSOR SUMMARY
+==============================================================================
+
+RQ4 Question: How does dynamic memory governance (SG-QMS = SACR + OGMM)
+affect downstream outcome-proxy prediction and retrieval safety, compared
+with unguided SACR and semantic-only baseline retrieval, on held-out patients?
+
+Evaluation size: N = 3,000 held-out encounters
+Why this size: N=3,000 was selected as the primary evaluation horizon because it is the first evaluated horizon at which OGMM reaches the pre-committed meaningful-activity criterion of at least 5 quarantinations. This is a methodological evaluation-horizon choice, not a claim that 3,000 is optimal.
+
+Baseline accuracy (covered): 0.4690
+SACR accuracy (covered):     0.4818
+SG-QMS accuracy (covered):   0.4818
+
+Quarantined: 17   Downgraded: 139   Retention: 0.9986   False-quarantine rate: 0.0000
+
+Statistical findings: SACR vs baseline McNemar p=0.9004; SG-QMS vs SACR McNemar p=N/A; SG-QMS vs baseline McNemar p=0.9004.
+Safety invariant result: state/context/joint violations = 0 for both SACR and SG-QMS (RQ2's eligibility gate held with zero exceptions at this N).
+
+One-sentence interpretation: at N=3,000, OGMM's governance mechanism is measurably active and provably safe (zero eligibility violations, low false-quarantine rate), but it has not yet produced a statistically detectable change in downstream prediction accuracy versus SACR.
+
+RQ4 STATUS (against the predefined criteria in Section 18): PARTIALLY SUPPORTED
+
+==============================================================================
+RQ4 FINAL -- PRIMARY EVALUATION AT THE GOVERNANCE-EXPOSURE HORIZON
+==============================================================================
+
+## 1. Research Question
+
+How does dynamic memory governance (SG-QMS = SACR + OGMM) improve downstream
+task performance and retrieval safety compared with unguided SACR and
+semantic-only baseline retrieval, when evaluated at a query volume large
+enough for governance to actually be exposed to repeated memory retrieval?
+
+## 2. Why the Original 300-Query Evaluation Was Insufficient for Governance
+
+The original RQ4 run (results/rq4/, preserved unmodified) evaluated 300 held-out
+queries and recorded 0 quarantines and 2 downgrades across 1,354 distinct
+memories touched over 1,374 retrievals (~1.01 retrievals/memory). OGMM's
+quarantine rule requires retrieval_count >= N_MIN=3 before a memory is even
+eligible; at ~1.01 retrievals/memory, almost no memory could reach that bar.
+This was not a defect in OGMM -- it was an evaluation-volume problem.
+
+## 3. Sequential Recurrence Analysis (Summary)
+
+A separate sample-size sensitivity sweep (results/rq4_sequential/, preserved
+unmodified) ran the identical frozen SACR+OGMM mechanism across six nested
+checkpoints (N=300 to 20,372) on one deterministic held-out query sequence.
+Quarantine counts observed: N=300 -> 0, N=1,000 -> 1, N=3,000 -> 17, N=5,000 ->
+49, N=10,000 -> 271, N=20,372 -> 1,168. The pre-committed criterion for
+'meaningfully active' (>=5 quarantines, fixed before that sweep ran) is first
+met at N=3,000.
+
+## 4. Why N=3,000 Was Selected
+
+N=3,000 was selected as the primary evaluation horizon because it is the first evaluated horizon at which OGMM reaches the pre-committed meaningful-activity criterion of at least 5 quarantinations. This is a methodological evaluation-horizon choice, not a claim that 3,000 is optimal.
+This evaluation horizon was read off the sequential sweep's own pre-registered
+decision rule, not chosen after comparing accuracy across candidate N values.
+
+## 5. Frozen Experimental Configuration
+
+SACR: state_threshold=0.7  context_threshold=0.9  lambda=(0.6,0.25,0.15)  top_k=5  candidate_k=100
+OGMM: N_MIN=3  BETA=-0.2  ALPHA=0.1  DOWNGRADE_THRESHOLD=0.4
+All of the above are read back from RQ2's/RQ3's own frozen metadata and asserted, not
+re-hardcoded independently. None were changed, tuned, or re-selected for this run.
+
+## 6. Dataset and Patient-Level Split
+
+UCI Diabetes 130-US Hospitals, 101766 encounter records.
+Total unique patients: 71518   Memory-pool patients: 57214   Held-out patients: 14304
+Memory-pool rows: 81394   Held-out rows: 20372
+Split is unstratified (label-blind), unchanged from experiments_rq4.build_split()'s own
+seed-42 random split over unique patient_nbr values.
+
+## 7. Exact Evaluation Protocol
+
+Query stream: the FIRST 3,000 rows of a single, full-length, seed-42
+permutation of all 20,372 held-out rows (identical construction to results/rq4_sequential/,
+re-verified below to produce numerically identical N=3,000 statistics). All three
+conditions process this exact same ordered 3,000-query sequence. Governance state (SG-QMS)
+and SACR's own oracle bookkeeping evolve cumulatively across the sequence -- each query is
+predicted BEFORE that query's own true label is used for anything, and governance updates
+use only the RETRIEVED memories' own historical feedback, never the current query's label.
+
+## 8. Baseline Results
+
+Accuracy (covered): 0.4690   Accuracy (all): 0.4690
+Macro-F1: 0.3491   Coverage: 1.0000 (3000/3000)
+Negative exposure: 0.1179   Negative-query rate: 0.4533
+Retrieval events: 15000   Distinct memories retrieved: 13303   Exactly-once: 11764   >=2: 1539   >=3: 146   >=5: 1   Max: 5
+Baseline has no state/context eligibility gate (structural: state_neutral_text never reads
+STATE_COLS), so no alignment-violation metric applies to it.
+
+## 9. SACR Results
+
+Accuracy (covered): 0.4818   Coverage: 0.9700 (2910/3000)
+Macro-F1: 0.3629   Negative exposure: 0.1069
+State/context/joint eligibility violations: 0/0/0 (of 13805 retrievals checked)
+Retrieval events: 13805   Distinct memories retrieved: 12379   Exactly-once: 11091   >=2: 1288   >=3: 127   >=5: 0   Max: 4
+
+## 10. SG-QMS Results
+
+Accuracy (covered): 0.4818   Coverage: 0.9700 (2910/3000)
+Macro-F1: 0.3629   Negative exposure: 0.1068
+State/context/joint eligibility violations: 0/0/0 (of 13805 retrievals checked)
+Retrieval events: 13805   Distinct memories retrieved: 12379   Exactly-once: 11089   >=2: 1290   >=3: 127   >=5: 0   Max: 4
+
+## 11. Governance Activity
+
+Distinct memories touched by governance: 12379
+Quarantined: 17   Downgraded: 139
+Memory retention (of touched set): 0.9986
+Number of memories reaching N_MIN=3 (eligible for quarantine consideration): 127
+Oracle-eligible set size (SACR's own unconstrained trajectory, RQ3's methodology): 17
+Quarantine effectiveness (fraction of oracle-eligible memories actually quarantined): 1.0000
+False-quarantine rate (quarantined but NOT oracle-eligible): 0.0000
+Pre-committed 'meaningfully active' floor: >=5 quarantines -- MET at this N.
+Pre-committed 'unacceptable false quarantine' line: >50% -- observed rate is WITHIN the acceptable range.
+
+## 12. Prediction Comparison
+
+condition     accuracy    macro-F1    coverage
+baseline        0.4690      0.3491      1.0000
+sacr            0.4818      0.3629      0.9700
+sg_qms          0.4818      0.3629      0.9700
+
+Per the interpretation rule for this report: governance activity (Section 11) and
+downstream prediction (this section) are DIFFERENT questions. A high quarantine count
+does not, by itself, imply a prediction-accuracy benefit -- see Section 13 for whether
+any accuracy difference above is statistically distinguishable from chance.
+
+## 13. Statistical Analysis
+
+Validity of the paired design: all three conditions process the IDENTICAL, deterministically-
+ordered 3,000-query sequence (verified: same_queries_all_conditions=True), so each query is its own paired unit across
+conditions -- exactly the condition McNemar (paired binary correctness) and Wilcoxon
+signed-rank (paired continuous metrics) require. This is the same validity argument the
+original RQ4 relies on for its own (smaller-N) comparisons; it is not new here.
+
+[sacr_vs_baseline]
+  Accuracy (McNemar): a_only_correct=513  b_only_correct=508  n_discordant=1021  p=0.9004
+  negative_memory_fraction (Wilcoxon signed-rank): n=2910  statistic=379841.0000  p=5.509e-05  rank-biserial r=-0.1207
+  mean_state_alignment (Wilcoxon signed-rank): n=2910  statistic=145606.0000  p=0  rank-biserial r=0.9308
+  mean_context_alignment (Wilcoxon signed-rank): n=2910  statistic=187150.5000  p=0  rank-biserial r=0.9114
+
+[sg_qms_vs_sacr]
+  Accuracy (McNemar): a_only_correct=0  b_only_correct=0  n_discordant=0  p=N/A
+    -> undefined: zero discordant pairs at this N. This means NO detectable per-query
+       accuracy difference was observed between these two conditions -- it is reported
+       as an undefined test, not manufactured as either a significant or null result.
+  negative_memory_fraction (Wilcoxon signed-rank): n=2910  statistic=0.0000  p=0.3173  rank-biserial r=-1.0000
+  mean_state_alignment (Wilcoxon signed-rank): n=2910  statistic=0.0000  p=0.1797  rank-biserial r=-1.0000
+  mean_context_alignment (Wilcoxon signed-rank): n=2910  statistic=0.0000  p=0.3173  rank-biserial r=1.0000
+
+[sg_qms_vs_baseline]
+  Accuracy (McNemar): a_only_correct=513  b_only_correct=508  n_discordant=1021  p=0.9004
+  negative_memory_fraction (Wilcoxon signed-rank): n=2910  statistic=378956.0000  p=5.013e-05  rank-biserial r=-0.1214
+  mean_state_alignment (Wilcoxon signed-rank): n=2910  statistic=145691.5000  p=0  rank-biserial r=0.9307
+  mean_context_alignment (Wilcoxon signed-rank): n=2910  statistic=187148.5000  p=0  rank-biserial r=0.9114
+
+No test was dropped or substituted after seeing results; all three pairwise comparisons
+use the same machinery (experiments_rq4._compare_conditions, _mcnemar, _paired_wilcoxon,
+imported unmodified) for every metric.
+
+## 14. Safety Invariant Results
+
+State violations (SACR/SG-QMS): 0/0
+Context violations (SACR/SG-QMS): 0/0
+Joint violations (SACR/SG-QMS): 0/0
+RQ2 alignment invariant preserved: True
+
+## 15. Leakage Checks
+
+Held-out patients absent from memory pool: True
+No held-out memory_id ever retrieved (leakage-excluded set never surfaced): True
+Outcome-leakage structural check: Verified by code inspection, not a runtime test: experiments_rq4_sequential.run_sequential_condition (mirroring experiments_rq4.evaluate_condition) reads row_d['readmitted'] (true_label) only after predicted/covered/correct are computed, and never passes it into sacr_retrieve, semantic_retrieve, or any governance function -- governance feedback comes exclusively from each retrieved memory's own precomputed historical `feedback` column.
+Same query sequence used by all three conditions: True
+
+## 16. Limitations
+
+- Outcome-proxy limitation (unchanged from RQ3/RQ4): `readmitted`-derived feedback is an
+  experimental outcome proxy, not causal ground truth or a clinical validity claim.
+- N=3,000 is a governance-EXPOSURE threshold, not an accuracy-optimizing choice; the
+  sequential sweep (Section 3) shows recurrence and governance activity both keep growing
+  well past N=3,000 -- this evaluation deliberately does not claim 3,000 is where the system
+  performs best, only where OGMM first has enough to work with by the pre-committed rule.
+- SACR's shadow-governance oracle (false-quarantine-rate denominator) reflects SACR's own
+  unconstrained trajectory over this sequence; SG-QMS's governance changes what IT retrieves
+  going forward, so its trajectory can diverge from SACR's for reasons beyond the quarantine
+  decision itself (the same caveat RQ3 documents for its own static oracle).
+- Single deterministic seed/order (42); a different ordering could shift which specific
+  memories reach N_MIN first, though the sequential sweep's aggregate recurrence rate is
+  order-independent evidence that this is not a seed-specific artifact.
+- Majority-vote prediction is a simple, fixed, auditable rule, not claimed optimal.
+
+## 17. Reproducibility Information
+
+experiment_id: RQ4FINAL_20260916T060050Z
+timestamp: 2026-09-16T06:10:28.612460+00:00
+python_version: 3.9.23
+platform: macOS-15.6.1-arm64-arm-64bit
+git_commit: e4753fd
+random_seed: 42
+primary_evaluation_horizon_N: 3000
+n_min: 3
+beta: -0.2
+alpha: 0.1
+downgrade_threshold: 0.4
+state_threshold: 0.7
+context_threshold: 0.9
+top_k: 5
+candidate_k: 100
+elapsed_seconds_total: 577.8523252010345
+
+Safety checks:
+  held_out_patients_absent_from_memory_pool: True
+  no_heldout_memory_id_ever_retrieved: True
+  outcome_leakage_structural_check: Verified by code inspection, not a runtime test: experiments_rq4_sequential.run_sequential_condition (mirroring experiments_rq4.evaluate_condition) reads row_d['readmitted'] (true_label) only after predicted/covered/correct are computed, and never passes it into sacr_retrieve, semantic_retrieve, or any governance function -- governance feedback comes exclusively from each retrieved memory's own precomputed historical `feedback` column.
+  same_queries_all_conditions: True
+  sacr_state_threshold_frozen: True
+  ranking_weights_frozen: True
+  sg_qms_uses_frozen_rq3_params: True
+  rq2_alignment_invariant_preserved: True
+  regression_checks_passed: True
+  consistency_with_rq4_sequential_N3000: passed=True  mismatches=[]
+  frozen_dirs_unchanged: {'rq1': True, 'rq2': True, 'rq3': True}
+  previous_rq4_results_preserved: {'rq4': True, 'rq4_sequential': True}
+  deterministic_sequence_reproducible: True
+
+## 18. Final RQ4 Interpretation
+
+Per the interpretation rule fixed for this report: mechanism validity, safety validity, and
+downstream predictive effectiveness are reported as three SEPARATE findings, not collapsed
+into one verdict:
+
+  A. RETRIEVAL SAFETY: HOLDS -- SACR's state/context eligibility invariant recorded zero violations for both SACR and SG-QMS.
+  B. GOVERNANCE ACTIVITY: CONFIRMED -- OGMM quarantined 17 and downgraded 139 memories, clearing the pre-committed >=5-quarantine floor, with quarantine effectiveness 1.0000 and false-quarantine rate 0.0000.
+  C. DOWNSTREAM PREDICTION: no statistically detectable difference was found between SG-QMS and SACR (McNemar p=N/A). This is reported honestly regardless of direction: governance firing correctly (B) does not
+     by itself establish a prediction-accuracy benefit (C), and the absence of a detected
+     accuracy benefit does not by itself mean governance is broken (B already stands on its
+     own evidence). These are not tuned to agree with each other.
+
+OVERALL RQ4 STATUS (against the predefined criteria): PARTIALLY SUPPORTED
+This status reflects whether ALL of (exposure achieved, governance meaningfully active,
+safety invariants held, false-quarantine rate acceptable, AND a statistically significant
+downstream prediction effect vs. SACR) were satisfied -- not a subjective judgment call.

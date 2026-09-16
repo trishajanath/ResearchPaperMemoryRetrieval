@@ -1,0 +1,279 @@
+============================================================
+RQ2 -- SACR MATHEMATICAL ALIGNMENT EXPERIMENT
+============================================================
+
+## 1. Research Question
+
+How can memory retrieval mathematically guarantee joint state and
+contextual alignment?
+
+## 2. Motivation
+
+RQ1 showed that SACR's weighted ranking score,
+  S_rank = 0.60*S_semantic + 0.25*S_context + 0.15*S_experience,
+combined with a hard state-alignment threshold, sharply reduces
+state-misaligned retrieval versus semantic-only retrieval. But a
+weighted average, by itself, does not mathematically GUARANTEE any
+particular alignment component stays above a bound -- a low S_state
+or S_context can still be compensated by a high S_semantic. RQ2 asks
+whether adding explicit hard eligibility constraints (rather than
+relying on the weights alone) can make that guarantee structural.
+
+## 3. Mathematical Formulation
+
+S_state(q,m)   = (1/|S|) * sum_j sim(q_j, m_j),  j in STATE_COLS
+S_context(q,m) = (1/|C|) * sum_j sim(q_j, m_j),  j in CONTEXT_COLS
+
+Eligibility indicator:
+  A(q,m) = 1  if S_state(q,m) >= tau_state AND S_context(q,m) >= tau_context
+           0  otherwise
+
+Only memories with A(q,m)=1 may enter the final retrieved set. Among
+eligible memories, the existing (unchanged) ranking formula orders them:
+  S_rank = 0.60*S_semantic + 0.25*S_context + 0.15*S_experience
+
+Property tested, for every returned memory m of query q:
+  m in R_k(q)  =>  S_state(q,m) >= tau_state  AND  S_context(q,m) >= tau_context
+
+## 4. Existing SACR Limitation
+
+Before RQ2, SACR enforced a hard threshold on S_state only
+(tau_state = 0.7); S_context entered only the weighted
+ranking score, so a memory with excellent context but poor state could
+still be excluded by the state gate, but a memory with excellent state
+and semantic similarity, yet poor context, faced no hard context
+check at all -- only a 0.25-weighted contribution to its score, which a
+high semantic or experience term could outweigh.
+
+## 5. Proposed Eligibility Constraint
+
+A second hard gate on S_context is added, opt-in via
+`active_rules['min_context_alignment']`. RQ1's own `active_rules` dict
+never sets this key, so RQ1's pipeline, results, and reports are
+provably unaffected (verified by re-running RQ1's own demo script before
+this experiment, with identical diagnostic counts).
+The state threshold (0.70) and ranking weights are unchanged.
+
+## 6. Context Threshold Selection
+
+S_context was sampled across all 40 RQ1 query
+instances (base+shifted), for each instance's top 100 semantic
+candidates -- the same pool SACR's ranking stage considers -- giving
+4000 samples in total.
+
+Empirical distribution of S_context:
+  mean: 0.873287
+  median: 0.919695
+  std: 0.117435
+  min: 0.475156
+  max: 1.000000
+  10th percentile: 0.673202
+  25th percentile: 0.811001
+  50th percentile: 0.919695
+  75th percentile: 0.963945
+  90th percentile: 0.981161
+
+Candidate thresholds evaluated:
+ tau_context   % passing   min joint/query  mean joint/query  queries short  sufficient?
+        0.50      99.90%                17             48.67              0         True
+        0.60      96.00%                17             46.83              0         True
+        0.70      87.75%                10             43.98              0         True
+        0.75      85.20%                 9             43.02              0         True
+        0.80      77.70%                 8             39.80              0         True
+        0.85      65.85%                 7             34.62              0         True
+        0.90      57.30%                 5             30.77              0         True
+
+Selection rule (pre-committed, not chosen after seeing results): pick the
+LARGEST candidate threshold for which every one of the 40 query instances
+still has >= TOP_K (5) jointly state+context eligible candidates within
+the top 100 semantic pool ('sufficient retrieval coverage', a hard
+requirement); among values satisfying that, the largest is closest in
+spirit to the existing 0.70 state threshold ('conceptual consistency') while
+remaining as selective as the coverage requirement allows.
+
+Chosen tau_context = 0.9
+State threshold tau_state = 0.7 (unchanged from RQ1).
+
+## 7. Experimental Setup
+
+Dataset: UCI Diabetes 130-US Hospitals, 101766 memories
+Query scenarios reused from RQ1: 20 pairs
+Query instances (base+shifted): 40
+CANDIDATE_K: 100   TOP_K: 5
+Ranking weights (unchanged): semantic=0.6 context=0.25 experience=0.15
+Random seed: 42
+Fixed test-query patient for Tests A-D: sacr.current_patient
+
+## 8. Test A -- State Violation
+
+Result: PASS
+{
+  "fully_mismatched_state": {
+    "memory_id": "M094371",
+    "semantic_similarity": 0.99992436170578,
+    "state_alignment": 0.09575725026852848,
+    "context_alignment": 1.0,
+    "rejected": true,
+    "check_passed": true
+  },
+  "partially_mismatched_state": {
+    "memory_id": "M047094",
+    "semantic_similarity": 0.9997262358665466,
+    "state_alignment": 0.5714285714285714,
+    "context_alignment": 1.0,
+    "rejected": true,
+    "check_passed": true
+  }
+}
+
+## 9. Test B -- Context Violation
+
+Result: PASS
+{
+  "fully_mismatched_context": {
+    "memory_id": "M030583",
+    "semantic_similarity": 0.9996649622917175,
+    "state_alignment": 1.0,
+    "context_alignment": 0.16991478623158013,
+    "rejected": true,
+    "check_passed": true
+  },
+  "partially_mismatched_context": {
+    "memory_id": "M062876",
+    "semantic_similarity": 0.9996594190597534,
+    "state_alignment": 1.0,
+    "context_alignment": 0.8571428571428571,
+    "rejected": true,
+    "check_passed": true
+  }
+}
+
+## 10. Test C -- Jointly Aligned Memories
+
+Result: PASS
+{
+  "candidate_1": {
+    "memory_id": "M045728",
+    "semantic_similarity": 0.999539852142334,
+    "state_alignment": 1.0,
+    "context_alignment": 1.0,
+    "eligible_and_retrieved": true,
+    "check_passed": true
+  },
+  "candidate_2": {
+    "memory_id": "M020031",
+    "semantic_similarity": 0.9995308518409729,
+    "state_alignment": 1.0,
+    "context_alignment": 1.0,
+    "eligible_and_retrieved": true,
+    "check_passed": true
+  }
+}
+
+## 11. Test D -- Ranking After Eligibility
+
+Result: PASS
+{
+  "ineligible_memory_id": "M094371",
+  "ineligible_had_highest_raw_semantic_score": true,
+  "ineligible_absent_from_output": true,
+  "expected_ranking_order": [
+    "M008046",
+    "M054083",
+    "M100503"
+  ],
+  "actual_ranking_order": [
+    "M008046",
+    "M054083",
+    "M100503"
+  ],
+  "ranking_matches_formula": true
+}
+
+## 12. Exhaustive Invariant Verification
+
+RQ2 invariant satisfied: TRUE
+Total memories retrieved (across all 40 query instances): 200
+State violations: 0
+Context violations: 0
+Joint violations: 0
+Query instances returning fewer than TOP_K memories: 0
+
+## 13. Results
+
+Old (weighted-only) vs. new (eligibility-gated) formulation, on one
+constructed memory with a state violation but high semantic/context:
+{
+  "memory_id": "M094371",
+  "semantic_similarity": 0.99992436170578,
+  "state_alignment": 0.09575725026852848,
+  "context_alignment": 1.0,
+  "experience_alignment": 1.0,
+  "naive_weighted_score": 0.999954617023468,
+  "lowest_actual_top_k_score": 0.9945319890975952,
+  "would_have_beaten_current_top_k_min_score": true,
+  "rejected_by_eligibility_gate": true
+}
+
+## 14. Interpretation
+
+All four controlled tests passed, and the
+exhaustive invariant check over all 40 real RQ1 query
+instances found 0 joint violations out of 200 retrieved memories.
+The comparison in Section 13 shows a state-violating memory whose naive
+weighted score (0.999955) would have matched or beaten the actual top-5's lowest score (0.994532) under weighted-only ranking, yet the
+eligibility gate rejected it outright -- illustrating why a weighted
+average alone does not provide the structural guarantee an explicit gate does.
+
+## 15. Limitations
+
+- This verifies a STRUCTURAL property of the code (a row can only enter
+  the ranked output after passing both checks), not a claim about clinical
+  correctness, causal validity, or that tau_context/tau_state are optimal.
+- Tests A-D use one fixed query (sacr.current_patient) and constructed
+  (not organically retrieved) synthetic memories to guarantee the exact
+  properties each test needs; they demonstrate the mechanism works as
+  specified, not that it generalizes to every possible query/memory pair.
+- tau_context was chosen from a small predefined candidate set using one
+  coverage rule over the current 20 RQ1 scenarios; a different scenario
+  sample or candidate set could select a different value.
+- The chosen threshold's coverage margin is thin: the worst-case query
+  instance had exactly 5 jointly-eligible candidates against
+  TOP_K=5 -- a slightly different query or a smaller CANDIDATE_K could
+  produce a query with fewer than TOP_K eligible memories at this threshold.
+- This does not claim generalization to other datasets.
+
+## 16. Reproducibility
+
+Random seed: 42
+Python version: 3.9.23
+Timestamp: 2026-09-14T17:08:38.386319+00:00
+Git commit: e4753fd
+Dataset shape: [101766, 22]
+Number of memory records: 101766
+State columns: ['age', 'gender', 'race', 'number_outpatient', 'number_emergency', 'number_inpatient', 'number_diagnoses']
+Context columns: ['admission_type_id', 'admission_source_id', 'time_in_hospital', 'medical_specialty', 'num_lab_procedures', 'num_procedures', 'num_medications']
+Experience columns: ['insulin', 'change', 'diabetesMed']
+State threshold: 0.7
+Context threshold: 0.9 (primary)
+Ranking weights: semantic=0.6 context=0.25 experience=0.15
+CANDIDATE_K: 100   TOP_K: 5
+Query scenarios reused from RQ1: 20 (identical generation code)
+Files generated:
+  results/rq2/experiment_report.txt
+  results/rq2/rq2_summary.csv
+  results/rq2/rq2_detailed_results.csv
+  results/rq2/context_threshold_analysis.csv
+  results/rq2/config.txt
+
+## 17. Conclusion
+
+Under the similarity functions and thresholds defined above, adding an
+explicit joint state+context eligibility gate to SACR structurally
+prevents any memory violating either constraint from entering the final
+retrieved set: 0 violations were found across
+200 retrieved memories in the real RQ1 query scenarios,
+and all four controlled tests behaved as the mathematical formulation
+predicts. This is a narrow, code-level guarantee about this eligibility
+mechanism under these similarity definitions -- it is not a claim of
+clinical correctness, causal validity, or an optimal threshold choice.

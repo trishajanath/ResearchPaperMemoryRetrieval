@@ -1,0 +1,3 @@
+condition,total_rounds,k_queries,cycles,accuracy_covered,coverage,macro_f1,negative_exposure,negative_query_rate,state_violations,context_violations,joint_violations,number_quarantined,number_downgraded,memory_retention_rate,distinct_memories_touched
+sacr,1000,50,20,0.4489795918367347,0.98,0.3148148148148148,0.1111111111111111,0.4489795918367347,0,0,0,,,,
+sg_qms,1000,50,20,0.4489795918367347,0.98,0.30074417919245505,0.01740571902196436,0.07040816326530612,0,0,0,28.0,28.0,0.895910780669145,269.0

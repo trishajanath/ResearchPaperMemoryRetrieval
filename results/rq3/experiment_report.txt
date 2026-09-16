@@ -1,0 +1,295 @@
+============================================================
+RQ3 -- OUTCOME-GATED MEMORY MAINTENANCE (OGMM)
+============================================================
+
+## 1. Research Question
+
+"Can outcome-based memory governance dynamically identify and quarantine
+low-utility experiences using implicit outcome feedback, without requiring
+human memory-quality labels?"
+
+## 2. Hypotheses (pre-registered, not altered after seeing results)
+
+H1: OGMM will quarantine memories that accumulate sufficiently negative
+    outcome-derived evidence.
+H2: OGMM will reduce the future retrieval rate of memories with negative
+    outcome proxies compared with static memory.
+H3: OGMM will preserve more explicit negative evidence than deletion-based
+    memory management because quarantined memories remain represented in Q.
+H4: OGMM will not quarantine all memories; favorable memories should remain
+    available at a substantially higher rate than repeatedly unfavorable ones.
+
+## 3. Dataset
+
+UCI Diabetes 130-US Hospitals, 101766 memory records.
+State columns: ['age', 'gender', 'race', 'number_outpatient', 'number_emergency', 'number_inpatient', 'number_diagnoses']
+Context columns: ['admission_type_id', 'admission_source_id', 'time_in_hospital', 'medical_specialty', 'num_lab_procedures', 'num_procedures', 'num_medications']
+Experience columns: ['insulin', 'change', 'diabetesMed']
+
+## 4. Outcome Proxy Definition
+
+The existing preprocessing (preprocess.py) maps the `readmitted` field to a
+feedback proxy: NO -> +1.0, >30 -> 0.0, <30 -> -1.0. This mapping was
+inspected and is unchanged (no implementation bug was found in it).
+
+## 5. Important Causal Limitation
+
+The UCI dataset provides no causal feedback about an agent's action. The
+`readmitted` field is only an EXPERIMENTAL OUTCOME PROXY / outcome-derived
+feedback proxy, attached to the historical record itself. This experiment
+does NOT claim clinical causality, treatment effectiveness, that a memory
+"caused" readmission, clinical correctness, or real-world deployment
+validity. It evaluates only whether a memory-management mechanism can learn
+from observed outcome proxies associated with retrieved experiences.
+
+## 6. Reference-Paper Motivation
+
+"How Memory Management Impacts LLM Agents: An Empirical Study of
+Experience-Following Behavior" motivates this design conceptually:
+experience-following, error propagation, memory utility from repeated
+retrieval history, and history-based memory management. The paper is NOT
+claimed to have proposed SG-QMS, SACR, OGMM, or the Negative Evidence
+Quarantine Index -- those are this project's own contribution, built only
+on the paper's general methodological motivation.
+
+## 7. OGMM Design
+
+Governance state G is maintained separately from the original memory bank M
+(memory_df is never mutated by this module); per memory_id, G tracks:
+retrieval_count, positive/neutral/negative_feedback_count, utility_sum,
+average_utility, quality_score, quarantined, quarantine_reason.
+average_utility(m) = utility_sum(m) / retrieval_count(m), updated after every
+observed retrieval+feedback event (Part 3).
+quality_score update (matches preprocess.py's own documented rule):
+  quality_score = clip(quality_score + ALPHA * feedback, 0, 1), ALPHA=0.1
+
+## 8. Governance States
+
+RETAIN: default; memory fully available to normal retrieval.
+DOWNGRADE: quality_score < 0.4 (sticky; evaluated only if not
+  already quarantined). Downgrade does not affect SACR retrieval eligibility
+  or ranking (SACR's formula/thresholds are frozen); it is governance
+  metadata only.
+QUARANTINE: retrieval_count >= N_MIN AND average_utility <= BETA (checked
+  before downgrade each round). A quarantined memory enters Q and is
+  excluded from all subsequent normal SACR retrieval in that condition.
+
+## 9. Negative Evidence Quarantine Design
+
+Q holds, per quarantined memory: memory_id, retrieval_count,
+negative_feedback_count, average_utility, quarantine_reason. Q's purpose is
+NOT deletion -- it preserves the explicit statement "this experience should
+not influence normal future retrieval" while keeping the original memory
+record (in memory_df) fully auditable. Enforcement uses sacr.sacr_retrieve's
+additive `excluded_memory_ids` parameter (default None => identical to
+RQ1/RQ2 behavior), applied strictly AFTER the frozen state+context
+eligibility check, so it cannot be mistaken for a change to SACR itself.
+
+## 10. Parameter Selection
+
+N_MIN candidates: [2, 3, 5, 8, 10]
+BETA candidates: [0.0, -0.2, -0.34, -0.5, -1.0]
+Selection rule (pre-committed, evaluated ONLY against the STATIC condition's
+unconstrained retrieval-history distribution -- never against OGMM's own
+comparison results): require N_MIN >= 3; take the smallest such N_MIN for
+which some BETA gives a qualifying_rate in (0.01, 0.25) (a
+meaningful but non-dominant minority of the eligible pool); among BETA
+candidates satisfying that, pick the largest (closest to the natural
+neutral cut-point 0.0).
+
+ n_min    beta  pool_size  n_qualifying  qualifying_rate
+     2    0.00        100            44           0.4400
+     2   -0.20        100            13           0.1300
+     2   -0.34        100            13           0.1300
+     2   -0.50        100            13           0.1300
+     2   -1.00        100            13           0.1300
+     3    0.00        100            44           0.4400
+     3   -0.20        100            13           0.1300
+     3   -0.34        100            13           0.1300
+     3   -0.50        100            13           0.1300
+     3   -1.00        100            13           0.1300
+     5    0.00        100            44           0.4400
+     5   -0.20        100            13           0.1300
+     5   -0.34        100            13           0.1300
+     5   -0.50        100            13           0.1300
+     5   -1.00        100            13           0.1300
+     8    0.00        100            44           0.4400
+     8   -0.20        100            13           0.1300
+     8   -0.34        100            13           0.1300
+     8   -0.50        100            13           0.1300
+     8   -1.00        100            13           0.1300
+    10    0.00        100            44           0.4400
+    10   -0.20        100            13           0.1300
+    10   -0.34        100            13           0.1300
+    10   -0.50        100            13           0.1300
+    10   -1.00        100            13           0.1300
+
+NOTE: eligible_pool_size is identical (100) across every N_MIN
+candidate. Because each of the 20 archetypes recurs exactly
+15 times under the fixed round schedule, every memory the static
+condition ever touches ends up retrieved exactly 15 times -- so N_MIN
+(2 through 10) does not discriminate under THIS protocol; only BETA does.
+N_MIN is still meaningful as a safety floor (it would matter under a protocol
+with variable per-memory exposure), but its selection here should not be read
+as empirically validated against this specific run.
+
+Selected N_MIN = 3, BETA = -0.2
+Downgrade threshold (frozen separately, Part 5): quality_score < 0.4
+
+## 11. Experimental Protocol
+
+20 recurring query archetypes, reused unmodified from RQ1's
+base scenario generation (experiments._make_query_pairs). Archetypes are
+cycled deterministically for 15 cycles (300 rounds total); the
+SAME round sequence is used, unmodified, for all three conditions (paired
+design). Each round: run SACR (frozen state+context eligibility, unchanged
+ranking weights), observe each retrieved memory's outcome proxy, update
+governance history, apply that condition's policy, proceed.
+
+## 12. Static Baseline (Condition A)
+
+SACR retrieval occurs every round; outcome proxy is observed and logged;
+no memory governance occurs; nothing is ever excluded from retrieval. This
+condition also serves as the unconstrained oracle for Section 10's parameter
+analysis and for the effectiveness/false-quarantine metrics below.
+
+## 13. History-Based Baseline (Condition B)
+
+Paper-inspired, not a reproduction of the reference paper's full
+implementation: tracks retrieval history and average utility using the SAME
+N_MIN=3/BETA=-0.2 rule as OGMM; once a memory meets the rule it is
+DELETED (excluded from all future retrieval), with no structured evidence
+preserved beyond bare exclusion-list membership.
+
+## 14. OGMM (Condition C, SG-QMS contribution)
+
+Tracks retrieval history, updates quality_score, applies RETAIN/DOWNGRADE/
+QUARANTINE using the SAME N_MIN=3/BETA=-0.2 rule for quarantine as
+the deletion baseline. The distinction from Condition B: poor memory ->
+DELETE (baseline) vs. poor memory -> QUARANTINE AS NEGATIVE EVIDENCE (OGMM,
+preserved and auditable in Q, not merely erased).
+
+## 15. Metrics
+
+Quarantine effectiveness, false quarantine rate, future negative retrieval
+rate (overall + first/second half of rounds), memory retention (vs. touched
+set and vs. full bank), number quarantined/downgraded/deleted, retrieval
+counts, negative evidence accumulation, quality distribution (OGMM only).
+
+## 16. Results
+
+[static]
+  total retrieval events: 1500
+  distinct memories touched: 100
+  negative retrieval rate -- overall: 0.1300  first half: 0.1307  second half: 0.1293
+  memory retention (vs touched set): 1.0000
+  memory retention (vs full 101766-memory bank): 1.000000
+
+[history_deletion]
+  total retrieval events: 1488
+  distinct memories touched: 116
+  negative retrieval rate -- overall: 0.0343  first half: 0.0670  second half: 0.0013
+  memory retention (vs touched set): 0.8534
+  memory retention (vs full 101766-memory bank): 0.999833
+  number deleted: 17
+  negative evidence accumulation (>= 2 negative observations): 17
+  quarantine/deletion effectiveness (vs static oracle): 1.0000
+  false quarantine/deletion rate (vs static oracle): 0.2353
+
+[ogmm]
+  total retrieval events: 1488
+  distinct memories touched: 116
+  negative retrieval rate -- overall: 0.0343  first half: 0.0670  second half: 0.0013
+  memory retention (vs touched set): 0.8534
+  memory retention (vs full 101766-memory bank): 0.999833
+  number quarantined: 17
+  number downgraded: 17
+  quality_score distribution (all touched memories): mean=0.7276 median=1.0000 std=0.3131 min=0.2000 max=1.0000  (all start at 0.5 before governance)
+  negative evidence accumulation (>= 2 negative observations): 17
+  quarantine/deletion effectiveness (vs static oracle): 1.0000
+  false quarantine/deletion rate (vs static oracle): 0.2353
+
+## 17. Comparison
+
+condition          overall neg. rate  2nd-half neg. rate  retention (touched)
+static                        0.1300              0.1293               1.0000
+history_deletion              0.0343              0.0013               0.8534
+ogmm                          0.0343              0.0013               0.8534
+
+RQ3 hypotheses:
+  H1: PASS -- {'passed': True, 'fired': True, 'all_valid': True}
+  H2: PASS -- {'passed': True, 'static_second_half_negative_rate': 0.12933333333333333, 'ogmm_second_half_negative_rate': 0.0013477088948787063}
+  H3: PASS -- {'passed': True, 'quarantined_with_reason': 17}
+  H4: PASS -- {'passed': True, 'not_all_quarantined': True, 'favorable_quarantine_rate': 0.0, 'unfavorable_quarantine_rate': 1.0}
+
+## 18. Interpretation
+
+OGMM quarantined 17 of 116 distinct memories it
+retrieved (0.1466 of the touched working set), and
+downgraded a further 17. Its second-half negative-retrieval
+rate (0.0013) compares to static's (0.1293) and history-deletion's (0.0013).
+The key structural distinction demonstrated is that OGMM's quarantined
+memories (17) all carry a populated quarantine_reason
+in Q (H3), whereas the deletion baseline's excluded set carries no equivalent
+structured evidence by design.
+
+## 19. Limitations
+
+- Outcome proxy, not causal ground truth (Section 5); readmission is not
+  attributable to the retrieved memory having been used.
+- N_MIN/BETA were selected from a small predefined grid using one coverage
+  rule over the static oracle distribution; a different rule or grid could
+  select different values.
+- The round sequence recurs over only 20 archetypes; results reflect this
+  specific deterministic query stream, not a claim of generalization.
+- "Effectiveness"/"false rate" use the static condition's own retrieval
+  trajectory as an oracle; because governance changes which memories get
+  retrieved going forward, OGMM's and static's trajectories can diverge for
+  reasons beyond the quarantine decision itself.
+- Quality_score/downgrade use a simple, deliberately unoptimized linear
+  update; it is not claimed to be an optimal or calibrated scoring rule.
+- The fixed archetype-cycling schedule gives every touched memory the same
+  number of exposures, so N_MIN did not empirically discriminate in this run
+  (see Section 10's note); only BETA was effectively selected on data here.
+
+## 20. Reproducibility
+
+experiment_id: RQ3_20260914T173329Z
+timestamp: 2026-09-14T17:34:48.842832+00:00
+python_version: 3.9.23
+git_commit: e4753fd
+random_seed: 42
+dataset_shape: [101766, 22]
+number_of_memories: 101766
+state_columns: ['age', 'gender', 'race', 'number_outpatient', 'number_emergency', 'number_inpatient', 'number_diagnoses']
+context_columns: ['admission_type_id', 'admission_source_id', 'time_in_hospital', 'medical_specialty', 'num_lab_procedures', 'num_procedures', 'num_medications']
+experience_columns: ['insulin', 'change', 'diabetesMed']
+outcome_mapping: {'NO': 1.0, '>30': 0.0, '<30': -1.0}
+n_min_candidates: [2, 3, 5, 8, 10]
+beta_candidates: [0.0, -0.2, -0.34, -0.5, -1.0]
+selected_n_min: 3
+selected_beta: -0.2
+parameter_selection_kind: primary
+downgrade_rule: quality_score < 0.4
+quality_update_rule: quality_score = clip(quality_score + 0.1 * feedback, 0, 1)
+num_rounds: 300
+num_archetypes: 20
+cycles: 15
+top_k: 5
+candidate_k: 100
+state_alignment_threshold: 0.7
+context_alignment_threshold: 0.9
+lambda_semantic: 0.6
+lambda_context: 0.25
+lambda_experience: 0.15
+
+## 21. Conclusion
+
+Under this deterministic, paired-query protocol, OGMM's quarantine mechanism
+fires correctly on memories meeting its own pre-committed rule (H1 PASS), preserves structured negative
+evidence unlike deletion (H3 PASS), and
+does not quarantine indiscriminately (H4 PASS).
+Its effect on future negative-retrieval rate versus static was confirmed (H2) under this protocol.
+This is a narrow, mechanism-level finding under one outcome proxy and one
+deterministic query stream -- it is not a claim of clinical validity or
+generalization beyond this experimental setup.

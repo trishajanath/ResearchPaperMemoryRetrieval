@@ -1,0 +1,69 @@
+{
+    "experiment_id": "RQ3_20260914T173329Z",
+    "timestamp": "2026-09-14T17:34:48.842832+00:00",
+    "python_version": "3.9.23",
+    "git_commit": "e4753fd",
+    "random_seed": 42,
+    "dataset_shape": [
+        101766,
+        22
+    ],
+    "number_of_memories": 101766,
+    "state_columns": [
+        "age",
+        "gender",
+        "race",
+        "number_outpatient",
+        "number_emergency",
+        "number_inpatient",
+        "number_diagnoses"
+    ],
+    "context_columns": [
+        "admission_type_id",
+        "admission_source_id",
+        "time_in_hospital",
+        "medical_specialty",
+        "num_lab_procedures",
+        "num_procedures",
+        "num_medications"
+    ],
+    "experience_columns": [
+        "insulin",
+        "change",
+        "diabetesMed"
+    ],
+    "outcome_mapping": {
+        "NO": 1.0,
+        ">30": 0.0,
+        "<30": -1.0
+    },
+    "n_min_candidates": [
+        2,
+        3,
+        5,
+        8,
+        10
+    ],
+    "beta_candidates": [
+        0.0,
+        -0.2,
+        -0.34,
+        -0.5,
+        -1.0
+    ],
+    "selected_n_min": 3,
+    "selected_beta": -0.2,
+    "parameter_selection_kind": "primary",
+    "downgrade_rule": "quality_score < 0.4",
+    "quality_update_rule": "quality_score = clip(quality_score + 0.1 * feedback, 0, 1)",
+    "num_rounds": 300,
+    "num_archetypes": 20,
+    "cycles": 15,
+    "top_k": 5,
+    "candidate_k": 100,
+    "state_alignment_threshold": 0.7,
+    "context_alignment_threshold": 0.9,
+    "lambda_semantic": 0.6,
+    "lambda_context": 0.25,
+    "lambda_experience": 0.15
+}

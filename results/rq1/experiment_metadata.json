@@ -1,0 +1,45 @@
+{
+    "experiment": "RQ1",
+    "description": "Baseline semantic retrieval vs SACR under a normal memory bank (Experiment A) and a state-shuffled memory bank (Experiment B), plus a secondary BASE-SHIFTED sensitivity analysis.",
+    "top_k": 5,
+    "candidate_k": 100,
+    "state_alignment_threshold": 0.7,
+    "semantic_weight": 0.6,
+    "context_weight": 0.25,
+    "experience_weight": 0.15,
+    "number_of_query_pairs": 20,
+    "number_of_query_instances_per_condition": 40,
+    "random_seed": 42,
+    "state_shuffle_seed": 42,
+    "timestamp": "2026-09-14T17:58:06.822751+00:00",
+    "number_of_memories": 101766,
+    "embedding_model": "all-MiniLM-L6-v2",
+    "paired_statistics": {
+        "normal": {
+            "n": 40,
+            "mean_diff": 0.07347932330827071,
+            "median_diff": 0.07028822055137846,
+            "std_diff": 0.054540884897179606,
+            "ci95_low": 0.05603630208944119,
+            "ci95_high": 0.09092234452710024,
+            "paired_t_stat": 8.520654661914001,
+            "paired_t_pvalue": 1.939334144347375e-10,
+            "wilcoxon_stat": 21.0,
+            "wilcoxon_pvalue": 2.6106724712715644e-07
+        },
+        "shuffled": {
+            "n": 40,
+            "mean_diff": 0.11778634085213033,
+            "median_diff": 0.11714285714285722,
+            "std_diff": 0.061312884712236754,
+            "ci95_low": 0.09817752902153058,
+            "ci95_high": 0.13739515268273006,
+            "paired_t_stat": 12.149913222899858,
+            "paired_t_pvalue": 7.83124657582772e-15,
+            "wilcoxon_stat": 0.0,
+            "wilcoxon_pvalue": 1.8189894035458565e-12
+        }
+    },
+    "python_version": "3.9.23",
+    "git_commit": "e4753fd"
+}

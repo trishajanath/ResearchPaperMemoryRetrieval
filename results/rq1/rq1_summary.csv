@@ -1,0 +1,5 @@
+bank_condition,method,n_query_instances,mean_state_alignment,min_state_alignment,misaligned_count,total_retrieved,misalignment_rate
+normal,baseline,40,0.7794980307912639,0.4929645542427497,77,200,0.385
+normal,sacr,40,0.8529773540995347,0.7030075187969924,0,200,0.0
+shuffled,baseline,40,0.6968984962406016,0.4811134980307913,122,200,0.61
+shuffled,sacr,40,0.8146848370927318,0.7013605442176871,0,200,0.0

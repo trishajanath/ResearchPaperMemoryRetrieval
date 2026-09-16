@@ -1,0 +1,13 @@
+check,passed,value
+test_a_state_violation,True,
+test_b_context_violation,True,
+test_c_jointly_aligned,True,
+test_d_ranking_after_eligibility,True,
+exhaustive_invariant_check,True,
+total_retrieved,,200
+state_violations,,0
+context_violations,,0
+joint_violations,,0
+context_threshold_chosen,,0.9
+context_threshold_selection_kind,,primary
+state_threshold,,0.7

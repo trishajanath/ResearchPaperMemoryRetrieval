@@ -1,0 +1,296 @@
+============================================================
+RQ4 -- END-TO-END EVALUATION
+============================================================
+
+## 1. Research Question
+
+How does dynamic memory governance improve downstream task performance
+and safety compared with static memory retrieval?
+
+## 2. Hypotheses (pre-registered)
+
+H1: SACR achieves higher held-out outcome-proxy agreement than semantic-only retrieval.
+H2: SG-QMS achieves equal or higher held-out outcome-proxy agreement than unguided SACR
+    (conservative rule: PASS only if statistically significantly better).
+H3: SG-QMS reduces exposure to unfavorable historical memories vs unguided SACR.
+H4: SG-QMS preserves the RQ2 state/context eligibility invariant during prediction.
+
+## 3. Dataset
+
+UCI Diabetes 130-US Hospitals, 101766 encounter records.
+STATE_COLS: ['age', 'gender', 'race', 'number_outpatient', 'number_emergency', 'number_inpatient', 'number_diagnoses']
+CONTEXT_COLS: ['admission_type_id', 'admission_source_id', 'time_in_hospital', 'medical_specialty', 'num_lab_procedures', 'num_procedures', 'num_medications']
+EXPERIENCE_COLS: ['insulin', 'change', 'diabetesMed']
+
+## 4. Patient-Level Split
+
+Total unique patients: 71518
+Memory-pool patients: 57214
+Held-out patients: 14304
+Memory-pool rows: 81394
+Held-out rows: 20372
+Split seed: 42   Target held-out fraction: 0.2
+Memory-pool class distribution: {'NO': 43902, '>30': 28390, '<30': 9102}
+Held-out class distribution: {'NO': 10962, '>30': 7155, '<30': 2255}
+Split is unstratified (label-blind): a simple random split over unique
+patient_nbr values, no use of readmitted to construct or balance it.
+Evaluation queries actually used: 300 (pre-committed cap MAX_EVAL_QUERIES=300 for computational tractability; sampled deterministically with seed 42 from the 20372 held-out rows, sorted by memory_id for a fixed, auditable order).
+
+## 5. Outcome Proxy
+
+Feedback mapping (unchanged, preserved from preprocess.py): {'NO': 1.0, '>30': 0.0, '<30': -1.0}
+`readmitted` is an OUTCOME-DERIVED EXPERIMENTAL PROXY, not a causal
+treatment-effect label, clinical ground truth, or medically optimal
+recommendation. The downstream task is: predict the held-out patient's
+readmitted category from retrieved historical experiences. This is an
+experimental prediction task, not a clinical decision-support validation.
+
+## 6. Leakage Prevention
+
+The held-out patients' encounter rows are excluded from the retrievable
+memory pool for ALL THREE conditions via sacr.py's/baseline_rag.py's
+existing, additive `excluded_memory_ids` parameter (applied while walking
+the full similarity ranking, so the embeddings' positional alignment is
+never disturbed -- a filtered/subset memory_bank was deliberately NOT used
+for this, since embeddings are indexed by the full, unfiltered row order).
+Held-out readmitted/feedback values are read only AFTER a prediction is
+produced, purely for evaluation logging -- never for query construction,
+memory selection, thresholds, governance, top-k, quality scores, or
+condition choice.
+
+## 7. Experimental Conditions
+
+A) Semantic baseline: state-neutral semantic retrieval only (state_neutral_text,
+   unchanged from RQ1) -- no STATE_COLS access, no eligibility gate.
+B) SACR (no governance): frozen state (>=0.70) + context (>=0.90) eligibility,
+   unchanged ranking weights; no OGMM, no quarantine exclusion, no quality filtering.
+C) Full SG-QMS: SACR retrieval + RQ3's exact governance mechanism (imported, not
+   reimplemented) -- quarantined memories excluded from subsequent SG-QMS queries.
+All three conditions receive the same held-out queries, same order, same memory
+pool, same TOP_K=5, same CANDIDATE_K=100 (where applicable), same seed,
+same majority-vote prediction rule. The only difference is memory governance.
+
+## 8. Frozen SACR Configuration
+
+State threshold (from RQ2 metadata): 0.7
+Context threshold (from RQ2 metadata): 0.9
+Ranking weights (unchanged): semantic=0.6 context=0.25 experience=0.15
+candidate_k=100  top_k=5 (both unchanged from RQ1/RQ2)
+
+## 9. Frozen OGMM Configuration
+
+N_MIN (from RQ3 metadata): 3
+BETA (from RQ3 metadata): -0.2
+Downgrade rule (imported from experiments_rq3, unchanged): quality_score < 0.4
+Quality update rule (imported, unchanged): quality_score = clip(quality_score + 0.1*feedback, 0, 1)
+Governance functions (_new_governance_entry, _apply_feedback, _update_quality,
+_meets_quarantine_criterion, _meets_downgrade_criterion) are imported directly
+from experiments_rq3.py -- no new governance algorithm was created for RQ4.
+
+## 10. Downstream Prediction Task
+
+y_hat(q) = mode{y_m1, ..., y_mk} over the readmitted categories of the top-k
+retrieved memories. Ties broken by ascending lexicographic order of the tied
+category strings (ASCII order: '<30' < '>30' < 'NO'), fixed before evaluation.
+If 0 eligible memories are retrieved, the query is recorded UNCOVERED with no
+fabricated prediction; it counts as incorrect only in the all-queries accuracy
+variant, and coverage is reported separately.
+
+## 11. Evaluation Protocol
+
+For SG-QMS: retrieve -> predict -> observe the RETRIEVED memories' own (already
+historical) feedback -> update governance -> next query. The held-out query's own
+outcome never enters governance or retrieval at any point. Baseline and SACR use
+the same query sequence but never update any exclusion state from what they observe.
+
+## 12. Metrics
+
+Outcome-proxy accuracy (covered and all-queries variants), macro-F1 with per-class
+support, coverage, negative-memory exposure (aggregate and per-query rate),
+governance-specific metrics (SG-QMS), and alignment safety violation counts (SACR, SG-QMS).
+
+## 13. Statistical Tests
+
+Predefined primary comparisons only: SACR vs baseline, SG-QMS vs SACR, SG-QMS vs
+baseline. Accuracy: exact McNemar test (binomial test on discordant pairs).
+Continuous per-query metrics (negative-memory fraction, mean state/context
+alignment): Wilcoxon signed-rank test (no normality assumption). No other tests
+were run or selectively reported.
+
+## 14. Results
+
+[baseline]
+  accuracy (covered): 0.4800   accuracy (all, uncovered=incorrect): 0.4800
+  macro-F1: 0.3792   coverage: 1.0000 (300/300)
+  per-class support (covered, true label): {'NO': 159, '>30': 98, '<30': 43}
+  negative exposure: 0.1033 (155/1500)
+  negative-query rate: 0.3933
+
+[sacr]
+  accuracy (covered): 0.4069   accuracy (all, uncovered=incorrect): 0.3933
+  macro-F1: 0.3187   coverage: 0.9667 (290/300)
+  per-class support (covered, true label): {'NO': 154, '>30': 95, '<30': 41}
+  negative exposure: 0.1230 (169/1374)
+  negative-query rate: 0.4448
+  alignment violations -- state: 0 context: 0 joint: 0 (of 1374 checked)
+
+[sg_qms]
+  accuracy (covered): 0.4069   accuracy (all, uncovered=incorrect): 0.3933
+  macro-F1: 0.3187   coverage: 0.9667 (290/300)
+  per-class support (covered, true label): {'NO': 154, '>30': 95, '<30': 41}
+  negative exposure: 0.1230 (169/1374)
+  negative-query rate: 0.4448
+  alignment violations -- state: 0 context: 0 joint: 0 (of 1374 checked)
+
+[sg_qms governance]
+  number_quarantined: 0
+  number_downgraded: 2
+  number_retained: 1354
+  distinct_memories_touched: 1354
+  quarantine_rate: 0.0000
+  memory_retention_rate: 1.0000
+  governed_retrievals: 1374
+  negative_evidence_quarantine_index_size: 0
+
+## 15. Baseline vs SACR
+
+accuracy diff: -0.0731   macro-F1 diff: -0.0606   coverage diff: -0.0333
+McNemar (accuracy): a_only_correct=60 b_only_correct=34 n_discordant=94 p=0.009548
+negative-exposure Wilcoxon: n=290 mean_diff=0.0219 p=0.04075
+state-alignment Wilcoxon: n=290 mean_diff=0.0784 p=5.712e-41
+context-alignment Wilcoxon: n=290 mean_diff=0.0294 p=6.92e-41
+
+## 16. SACR vs SG-QMS
+
+accuracy diff: 0.0000   macro-F1 diff: 0.0000   coverage diff: 0.0000
+McNemar (accuracy): a_only_correct=0 b_only_correct=0 n_discordant=0 p=N/A
+negative-exposure Wilcoxon: n=290 mean_diff=0.0000 p=N/A
+state-alignment Wilcoxon: n=290 mean_diff=0.0000 p=N/A
+context-alignment Wilcoxon: n=290 mean_diff=0.0000 p=N/A
+
+## 17. SG-QMS vs Baseline
+
+accuracy diff: -0.0731   macro-F1 diff: -0.0606   coverage diff: -0.0333
+McNemar (accuracy): a_only_correct=60 b_only_correct=34 n_discordant=94 p=0.009548
+negative-exposure Wilcoxon: n=290 mean_diff=0.0219 p=0.04075
+state-alignment Wilcoxon: n=290 mean_diff=0.0784 p=5.712e-41
+context-alignment Wilcoxon: n=290 mean_diff=0.0294 p=6.92e-41
+
+## 18. Governance Results
+
+{
+  "number_quarantined": 0,
+  "number_downgraded": 2,
+  "number_retained": 1354,
+  "distinct_memories_touched": 1354,
+  "quarantine_rate": 0.0,
+  "memory_retention_rate": 1.0,
+  "governed_retrievals": 1374,
+  "negative_evidence_quarantine_index_size": 0
+}
+
+## 19. Alignment Safety Results
+
+SACR: {'total_checked': 1374, 'state_violations': 0, 'context_violations': 0, 'joint_violations': 0}
+SG-QMS: {'total_checked': 1374, 'state_violations': 0, 'context_violations': 0, 'joint_violations': 0}
+Expected and observed: 0 violations for both (RQ2 invariant preserved).
+
+## 20. Hypothesis Decisions
+
+H1: NOT SUPPORTED -- {'decision': 'NOT SUPPORTED', 'sacr_accuracy': 0.4068965517241379, 'baseline_accuracy': 0.48, 'mcnemar': {'a_only_correct': 60, 'b_only_correct': 34, 'n_discordant': 94, 'p_value': 0.009547810466077417}}
+H2: INCONCLUSIVE -- {'decision': 'INCONCLUSIVE', 'sg_qms_accuracy': 0.4068965517241379, 'sacr_accuracy': 0.4068965517241379, 'mcnemar': {'a_only_correct': 0, 'b_only_correct': 0, 'n_discordant': 0, 'p_value': nan}}
+H3: NOT SUPPORTED -- {'decision': 'NOT SUPPORTED', 'sg_qms_negative_exposure': 0.12299854439592431, 'sacr_negative_exposure': 0.12299854439592431}
+H4: PASS -- {'decision': 'PASS', 'violations': {'total_checked': 1374, 'state_violations': 0, 'context_violations': 0, 'joint_violations': 0}}
+
+## 21. Interpretation
+
+SACR vs baseline accuracy: 0.4069 vs 0.4800 (NOT SUPPORTED on H1).
+SG-QMS vs SACR accuracy: 0.4069 vs 0.4069 (INCONCLUSIVE on H2, conservative
+significance-required rule -- SG-QMS is NOT required to beat SACR for this
+experiment to be informative; a null result here is reported honestly, not
+reframed.
+SG-QMS negative exposure (0.1230) vs SACR's (0.1230): NOT SUPPORTED on H3.
+Alignment invariant: PASS on H4 -- SG-QMS's downstream
+prediction task never violated the frozen state/context eligibility gate.
+
+IMPORTANT: this experiment evaluates an outcome-proxy prediction task using
+historical hospital records. It does NOT establish clinical efficacy, treatment
+effectiveness, causal relationships, patient-level medical recommendations,
+real-world deployment safety, or superiority for clinical decision making. The
+`readmitted` variable is an observational historical outcome proxy; this
+evaluates the computational memory framework, not a validated clinical
+decision-support system.
+
+## 22. Limitations
+
+- Outcome-proxy limitation carried over from RQ3: governance feedback is
+  derived from historical outcome labels already attached to stored memory
+  records, not independent repeated environmental observations. This experiment
+  does not claim to demonstrate online learning from genuinely new real-world
+  feedback; it evaluates whether outcome-derived historical evidence can be
+  operationalized into memory governance and improve downstream
+  retrieval/prediction behavior.
+- Evaluation is capped at 300 deterministically-sampled held-out
+  queries (of 20372 available) for computational
+  tractability, decided before any result was observed.
+- The majority-vote prediction rule is a simple, fixed, auditable choice; it is
+  not claimed to be an optimal predictor.
+- H2 uses a conservative, predeclared significance-required rule specifically
+  because no statistically justified non-inferiority margin could be derived
+  from the existing design; a NOT SUPPORTED verdict on H2 does not mean SG-QMS
+  performed worse, only that superiority over SACR was not established here.
+- SG-QMS quarantined 0 memories here: 1354 distinct
+  memories were touched across 1374 retrievals (~1.01
+  retrievals per memory on average). Unlike RQ3's deliberately-repeating 20-archetype
+  cycle, RQ4's 300 evaluation queries are DISTINCT real
+  held-out patients, so the same memory rarely recurs in enough top-k sets to reach
+  N_MIN=3 retrievals within this evaluation's size. This is a direct
+  consequence of query diversity at this sample size, not evidence that the quarantine
+  mechanism is broken (RQ3 already verified it fires correctly under repeated exposure).
+
+## 23. Reproducibility
+
+experiment_id: RQ4_20260914T175217Z
+timestamp: 2026-09-14T17:53:16.889686+00:00
+python_version: 3.9.23
+platform: macOS-15.6.1-arm64-arm-64bit
+git_commit: e4753fd
+random_seed: 42
+dataset_shape: [101766, 22]
+number_of_memories: 101766
+state_threshold: 0.7
+context_threshold: 0.9
+lambda_semantic: 0.6
+lambda_context: 0.25
+lambda_experience: 0.15
+top_k: 5
+candidate_k: 100
+n_min: 3
+beta: -0.2
+num_evaluation_queries: 300
+max_eval_queries_cap: 300
+query_ordering: sorted by memory_id after deterministic sampling
+split_method: unstratified random split over unique patient_nbr values
+feedback_mapping: {'NO': 1.0, '>30': 0.0, '<30': -1.0}
+
+Final safety checks:
+  held_out_patients_absent_from_memory_pool: OK
+  no_heldout_memory_id_ever_retrieved: OK
+  baseline_excludes_state_cols: OK
+  sacr_state_threshold_frozen: OK
+  ranking_weights_frozen: OK
+  sg_qms_uses_frozen_rq3_params: OK
+  same_queries_all_conditions: OK
+  rq2_alignment_invariant_preserved: OK
+  regression_checks_passed: OK
+
+## 24. Conclusion
+
+Under this deterministic, patient-level held-out protocol, SACR's frozen state/context
+eligibility gate did not demonstrably improve downstream outcome-proxy agreement over semantic-only retrieval (H1).
+SG-QMS governance was not shown to
+significantly improve accuracy beyond unguided SACR (H2), while not reducing exposure to
+unfavorable historical memories (H3) and fully preserving the RQ2 alignment invariant
+(H4). These are narrow, mechanism-level findings on one outcome proxy, one
+deterministic patient-level split, and one prediction rule -- not a claim of
+clinical validity, causal effect, or real-world deployment readiness.

@@ -1,0 +1,22 @@
+{
+    "experiment_id": "RQ2_20260914T170830Z",
+    "timestamp": "2026-09-14T17:08:38.386319+00:00",
+    "python_version": "3.9.23",
+    "git_commit": "e4753fd",
+    "random_seed": 42,
+    "dataset_shape": [
+        101766,
+        22
+    ],
+    "number_of_memories": 101766,
+    "number_of_query_pairs": 20,
+    "number_of_query_instances": 40,
+    "state_threshold": 0.7,
+    "context_threshold": 0.9,
+    "context_threshold_selection": "primary",
+    "lambda_semantic": 0.6,
+    "lambda_context": 0.25,
+    "lambda_experience": 0.15,
+    "candidate_k": 100,
+    "top_k": 5
+}

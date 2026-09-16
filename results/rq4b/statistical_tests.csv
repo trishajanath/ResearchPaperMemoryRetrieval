@@ -1,0 +1,24 @@
+scope,metric,test,n,statistic_or_pairs,p_value,effect_size,note
+cycle_1,correctness,"McNemar (per-cycle, n=K_QUERIES paired patients)",0,"a_only=0, b_only=0",,,undefined (N/A) when n_discordant=0
+cycle_2,correctness,"McNemar (per-cycle, n=K_QUERIES paired patients)",0,"a_only=0, b_only=0",,,undefined (N/A) when n_discordant=0
+cycle_3,correctness,"McNemar (per-cycle, n=K_QUERIES paired patients)",0,"a_only=0, b_only=0",,,undefined (N/A) when n_discordant=0
+cycle_4,correctness,"McNemar (per-cycle, n=K_QUERIES paired patients)",4,"a_only=2, b_only=2",1.0,,
+cycle_5,correctness,"McNemar (per-cycle, n=K_QUERIES paired patients)",4,"a_only=2, b_only=2",1.0,,
+cycle_6,correctness,"McNemar (per-cycle, n=K_QUERIES paired patients)",4,"a_only=2, b_only=2",1.0,,
+cycle_7,correctness,"McNemar (per-cycle, n=K_QUERIES paired patients)",4,"a_only=2, b_only=2",1.0,,
+cycle_8,correctness,"McNemar (per-cycle, n=K_QUERIES paired patients)",4,"a_only=2, b_only=2",1.0,,
+cycle_9,correctness,"McNemar (per-cycle, n=K_QUERIES paired patients)",4,"a_only=2, b_only=2",1.0,,
+cycle_10,correctness,"McNemar (per-cycle, n=K_QUERIES paired patients)",4,"a_only=2, b_only=2",1.0,,
+cycle_11,correctness,"McNemar (per-cycle, n=K_QUERIES paired patients)",4,"a_only=2, b_only=2",1.0,,
+cycle_12,correctness,"McNemar (per-cycle, n=K_QUERIES paired patients)",4,"a_only=2, b_only=2",1.0,,
+cycle_13,correctness,"McNemar (per-cycle, n=K_QUERIES paired patients)",4,"a_only=2, b_only=2",1.0,,
+cycle_14,correctness,"McNemar (per-cycle, n=K_QUERIES paired patients)",4,"a_only=2, b_only=2",1.0,,
+cycle_15,correctness,"McNemar (per-cycle, n=K_QUERIES paired patients)",4,"a_only=2, b_only=2",1.0,,
+cycle_16,correctness,"McNemar (per-cycle, n=K_QUERIES paired patients)",4,"a_only=2, b_only=2",1.0,,
+cycle_17,correctness,"McNemar (per-cycle, n=K_QUERIES paired patients)",4,"a_only=2, b_only=2",1.0,,
+cycle_18,correctness,"McNemar (per-cycle, n=K_QUERIES paired patients)",4,"a_only=2, b_only=2",1.0,,
+cycle_19,correctness,"McNemar (per-cycle, n=K_QUERIES paired patients)",4,"a_only=2, b_only=2",1.0,,
+cycle_20,correctness,"McNemar (per-cycle, n=K_QUERIES paired patients)",4,"a_only=2, b_only=2",1.0,,
+cycle_level_overall,accuracy_covered,"Wilcoxon signed-rank (paired across CYCLES=20 cycles, cycle is the unit -- not pseudo-replicated)",20,,,,n_nonzero_cycle_diffs=0
+cycle_level_overall,negative_exposure,"Wilcoxon signed-rank (paired across CYCLES=20 cycles, cycle is the unit -- not pseudo-replicated)",20,0.0,0.00010474573563786466,-1.0,n_nonzero_cycle_diffs=17
+pooled_descriptive_ALL_ROUNDS,correctness,DESCRIPTIVE COUNTS ONLY -- NOT a statistical test (pseudo-replication across cycles),1000,"both_correct=406, both_wrong=526, sg_qms_correct_sacr_wrong=34, sg_qms_wrong_sacr_correct=34",,,"Same 50 patients recur 20x; do not treat as 1,000 independent samples. See per-cycle and cycle-level rows above for valid inference."

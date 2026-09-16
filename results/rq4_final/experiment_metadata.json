@@ -1,0 +1,127 @@
+{
+  "experiment_id": "RQ4FINAL_20260916T060050Z",
+  "primary_evaluation_horizon_N": 3000,
+  "primary_n_selection_statement": "N=3,000 was selected as the primary evaluation horizon because it is the first evaluated horizon at which OGMM reaches the pre-committed meaningful-activity criterion of at least 5 quarantinations. This is a methodological evaluation-horizon choice, not a claim that 3,000 is optimal.",
+  "meaningful_quarantine_floor": 5,
+  "unacceptable_false_quarantine_rate_threshold": 0.5,
+  "timestamp": "2026-09-16T06:10:28.612460+00:00",
+  "python_version": "3.9.23",
+  "platform": "macOS-15.6.1-arm64-arm-64bit",
+  "git_commit": "e4753fd",
+  "random_seed": 42,
+  "dataset_shape": [
+    101766,
+    22
+  ],
+  "number_of_memories": 101766,
+  "state_threshold": 0.7,
+  "context_threshold": 0.9,
+  "lambda_semantic": 0.6,
+  "lambda_context": 0.25,
+  "lambda_experience": 0.15,
+  "top_k": 5,
+  "candidate_k": 100,
+  "n_min": 3,
+  "beta": -0.2,
+  "alpha": 0.1,
+  "downgrade_threshold": 0.4,
+  "feedback_mapping": {
+    "NO": 1.0,
+    ">30": 0.0,
+    "<30": -1.0
+  },
+  "sequence_construction": "Identical to results/rq4_sequential/: np.random.default_rng(42).permutation over the full 20,372-row held-out set from experiments_rq4.build_split(); the first 3,000 rows of that single permutation form this evaluation's query stream.",
+  "original_rq4_max_eval_queries": 300,
+  "original_rq4_results_dir": "/Users/trishajanath/DiabetesMemory/results/rq4",
+  "rq4_sequential_results_dir": "/Users/trishajanath/DiabetesMemory/results/rq4_sequential",
+  "elapsed_seconds_by_condition": {
+    "sacr": 255.5437309741974,
+    "sg_qms": 256.8102037906647,
+    "baseline": 64.69878602027893
+  },
+  "elapsed_seconds_total": 577.8523252010345,
+  "split_info": {
+    "total_unique_patients": 71518,
+    "memory_pool_patients": 57214,
+    "heldout_patients": 14304,
+    "memory_pool_rows": 81394,
+    "heldout_rows": 20372,
+    "seed": 42,
+    "heldout_fraction_target": 0.2,
+    "memory_pool_class_distribution": {
+      "NO": 43902,
+      ">30": 28390,
+      "<30": 9102
+    },
+    "heldout_class_distribution": {
+      "NO": 10962,
+      ">30": 7155,
+      "<30": 2255
+    }
+  },
+  "hypotheses": {
+    "H1": {
+      "decision": "NOT SUPPORTED",
+      "sacr_accuracy": 0.481786941580756,
+      "baseline_accuracy": 0.469,
+      "mcnemar": {
+        "a_only_correct": 513,
+        "b_only_correct": 508,
+        "n_discordant": 1021,
+        "p_value": 0.900386245854838
+      }
+    },
+    "H2": {
+      "decision": "INCONCLUSIVE",
+      "sg_qms_accuracy": 0.481786941580756,
+      "sacr_accuracy": 0.481786941580756,
+      "mcnemar": {
+        "a_only_correct": 0,
+        "b_only_correct": 0,
+        "n_discordant": 0,
+        "p_value": NaN
+      }
+    },
+    "H3": {
+      "decision": "PASS",
+      "sg_qms_negative_exposure": 0.10684534588917059,
+      "sacr_negative_exposure": 0.10691778341180731
+    },
+    "H4": {
+      "decision": "PASS",
+      "violations": {
+        "total_checked": 13805,
+        "state_violations": 0,
+        "context_violations": 0,
+        "joint_violations": 0
+      }
+    }
+  },
+  "safety_checks": {
+    "held_out_patients_absent_from_memory_pool": true,
+    "no_heldout_memory_id_ever_retrieved": true,
+    "outcome_leakage_structural_check": "Verified by code inspection, not a runtime test: experiments_rq4_sequential.run_sequential_condition (mirroring experiments_rq4.evaluate_condition) reads row_d['readmitted'] (true_label) only after predicted/covered/correct are computed, and never passes it into sacr_retrieve, semantic_retrieve, or any governance function -- governance feedback comes exclusively from each retrieved memory's own precomputed historical `feedback` column.",
+    "same_queries_all_conditions": true,
+    "sacr_state_threshold_frozen": true,
+    "ranking_weights_frozen": true,
+    "sg_qms_uses_frozen_rq3_params": true,
+    "rq2_alignment_invariant_preserved": true,
+    "regression_checks_passed": true,
+    "consistency_with_rq4_sequential_N3000": {
+      "checked": true,
+      "mismatches": [],
+      "passed": true
+    },
+    "frozen_dirs_unchanged": {
+      "rq1": true,
+      "rq2": true,
+      "rq3": true
+    },
+    "previous_rq4_results_preserved": {
+      "rq4": true,
+      "rq4_sequential": true
+    },
+    "deterministic_sequence_reproducible": true
+  },
+  "all_safety_checks_pass": true
+}

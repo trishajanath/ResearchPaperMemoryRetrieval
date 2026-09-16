@@ -1,0 +1,287 @@
+Professor Summary
+==============================================================================
+
+1. WHY: RQ4-final (N=3,000, organic query order) showed OGMM mechanically active
+   (17 quarantines) but almost no measurable downstream effect (only 1-2 of 2,910
+   covered queries had any retrieval difference between SACR and SG-QMS) -- an
+   exposure problem, not necessarily a mechanism problem. RQ4-B controls for exposure
+   directly: a small fixed set of held-out queries is repeated across many cycles so
+   the same memories are retrieved often enough for governance to have a real chance
+   to diverge from SACR, and for that divergence (if any) to be observed downstream.
+
+2. HOW RECURRENCE WAS CONSTRUCTED: a fixed, deterministic set of 50 held-out
+   queries (Q1..Q50, drawn from the front of the same seed-42 deterministic held-out
+   ordering used in rq4_sequential/rq4_final) was repeated for 20 identical cycles
+   (1000 total rounds per condition). Query CONTENT and historical outcomes were
+   never altered between cycles -- see the Critical Feedback Caveat below.
+
+3. WHAT REMAINED FROZEN: SACR (state 0.70, context 0.90, weights 0.60/0.25/0.15),
+   OGMM (N_MIN=3, BETA=-0.2, ALPHA=0.1, DOWNGRADE_THRESHOLD=0.4), the feedback mapping,
+   the patient-level split, and random seed 42 -- all read back from RQ1-3's own frozen
+   metadata and asserted, never re-tuned for this experiment.
+
+4. GOVERNANCE ACTIVATION: YES -- 28 memories quarantined, 28 downgraded by the final cycle (retention 0.8959).
+5. RETRIEVAL SETS CHANGED: YES -- mean per-query Jaccard overlap between SACR's and SG-QMS's retrieved sets fell to 0.8350 by the final cycle (1.0 = identical).
+6. PREDICTIONS CHANGED: YES -- 10.0% of queries in the final cycle had a different SG-QMS prediction than SACR.
+7. CORRECTNESS CHANGED: YES -- net direction: unchanged.
+8. SAFETY INVARIANTS: SATISFIED -- state/context/joint violations = 0/0/0 across all 1000 rounds.
+9. WHAT THIS CAN/CANNOT ESTABLISH: this is a controlled, repeated-exposure MECHANISM
+   stress test on 50 real held-out patients artificially re-queried 20 times each. It
+   can establish whether OGMM's governance logic fires correctly and safely under forced
+   recurrence, and whether that firing propagates to retrieval/prediction/correctness. It
+   CANNOT establish that any single patient was genuinely re-admitted 20 times, and it
+   cannot generalize a magnitude-of-benefit claim to natural deployment -- see RQ4-final
+   for that (organic, non-repeated) evaluation.
+
+INTERPRETATION:
+  - Individual-query correctness DID change with governance active, but symmetrically in both directions: pooled across all 1000 rounds, 34 queries became correct under SG-QMS that were wrong under SACR, while 34 became wrong that were correct under SACR -- netting to zero aggregate accuracy difference. This is a genuine mixed effect at the query level, not the absence of an effect; the cycle-level accuracy test found 0 of the 20 cycles with any accuracy difference at all (N/A p-value: test is undefined/uninformative when there is no variation to test). Do not read this as either 'SG-QMS improves' or 'SG-QMS is neutral' -- it measurably redistributes which specific patients are predicted correctly, without a net gain or loss.
+
+==============================================================================
+RQ4-B -- CONTROLLED REPEATED-EXPOSURE RECURRENCE EXPERIMENT
+==============================================================================
+
+## 1. Research Question
+
+Under forced, controlled repeated exposure of the SAME held-out queries, does SG-QMS's
+governance mechanism (a) progressively reduce exposure to repeatedly-negative memories,
+(b) change retrieval sets relative to SACR, (c) change downstream predictions, (d) change
+downstream correctness, and (e) preserve SACR's state/context safety guarantees?
+
+## 2. Why Recurrence-Controlled Evaluation Was Introduced
+
+RQ4-final (results/rq4_final/, N=3,000, preserved unmodified) found OGMM mechanically
+active (17 quarantines, 100% effectiveness, 0% false-quarantine) but with a per-query
+effect size too small to detect: SACR and SG-QMS's retrieved sets differed for only 1-2
+of 2,910 covered queries, and 0 predictions changed. This experiment isolates whether
+that null downstream result was an exposure-volume artifact by forcing much higher
+per-memory retrieval counts within a small, fixed, auditable query set.
+
+## 3. How Recurrence Was Constructed
+
+Q1..Q50: the first 50 rows of the SAME seed-42 full deterministic
+permutation of the held-out set used by rq4_sequential.build_full_deterministic_sequence
+(imported unmodified). This fixed set was repeated for 20 cycles, unmodified, in the
+same order every cycle -- 1000 total evaluation rounds per condition. No query content,
+state, context, experience field, or historical outcome was changed between cycles.
+
+K_QUERIES=50 and CYCLES=20 were fixed before this experiment ran and were not adjusted after inspecting results.
+
+## CRITICAL FEEDBACK CAVEAT
+
+Each memory's feedback is a fixed historical attribute; repeated retrieval returns the identical historical value every time. This experiment is a controlled repeated-exposure simulation of already-recorded historical outcomes, not new independent environmental feedback.
+Concretely: a memory's average_utility is exactly its fixed feedback value after any
+number of retrievals (feedback never changes), so a memory with historical feedback=-1.0
+becomes quarantine-eligible deterministically as soon as retrieval_count>=N_MIN=3 (i.e.
+by the end of cycle 3) and is quarantined the next time it is checked. This is a
+deterministic mechanical consequence of the frozen governance rule applied to a fixed
+historical record -- not evidence of new clinical events or independent new evidence.
+
+## 4. What Remained Frozen
+
+SACR: state_threshold=0.7 context_threshold=0.9 lambda=(0.6,0.25,0.15) top_k=5 candidate_k=100
+OGMM: N_MIN=3 BETA=-0.2 ALPHA=0.1 DOWNGRADE_THRESHOLD=0.4
+Feedback mapping: {'NO': 1.0, '>30': 0.0, '<30': -1.0}   Random seed: 42
+Patient-level split: identical to RQ4 (experiments_rq4.build_split, unmodified, unchanged split_info).
+
+## 5. Dataset and Patient-Level Split
+
+Total unique patients: 71518   Memory-pool patients: 57214   Held-out patients: 14304
+The 50 queries used here are a fixed subset of the 20372 held-out rows;
+the memory pool (retrievable bank) is the SAME memory_pool_df as RQ4/RQ4-final, unmodified
+across cycles -- only SG-QMS's exclusion set grows as governance fires.
+
+## 6. Exact Evaluation Protocol
+
+Two conditions (SACR: no governance; SG-QMS: SACR + persistent OGMM state across ALL
+20 cycles) process the IDENTICAL repeated query sequence, in the same order, from the
+same initial memory bank. Each round is predicted, logged, THEN (SG-QMS only) governance
+is updated from the retrieved memories' own historical feedback -- never from the current
+query's own true label. Both conditions reuse experiments_rq4_sequential.run_sequential_condition
+unmodified, checkpointed at every cycle boundary.
+
+## 7. Governance Activity by Cycle
+
+ cycle  new_Q  new_D  cum_Q  cum_D  retention  mean_quality
+     1      0      0      0      0     1.0000        0.5461
+     2      0     27      0     27     1.0000        0.5922
+     3     27      0     27     27     0.8889        0.6383
+     4      0      0     27     27     0.8993        0.6810
+     5      0      1     27     28     0.8993        0.7366
+     6      1      0     28     28     0.8955        0.7403
+     7      0      0     28     28     0.8959        0.7435
+     8      0      0     28     28     0.8959        0.7476
+     9      0      0     28     28     0.8959        0.7476
+    10      0      0     28     28     0.8959        0.7476
+    11      0      0     28     28     0.8959        0.7476
+    12      0      0     28     28     0.8959        0.7476
+    13      0      0     28     28     0.8959        0.7476
+    14      0      0     28     28     0.8959        0.7476
+    15      0      0     28     28     0.8959        0.7476
+    16      0      0     28     28     0.8959        0.7476
+    17      0      0     28     28     0.8959        0.7476
+    18      0      0     28     28     0.8959        0.7476
+    19      0      0     28     28     0.8959        0.7476
+    20      0      0     28     28     0.8959        0.7476
+
+By the pre-committed rule used in RQ4-sequential/RQ4-final (>=5 quarantines = 'meaningfully
+active'), governance became meaningfully active at cycle 3.
+
+## 8. Retrieval, Prediction, and Correctness Change by Cycle
+
+ cycle mean_jaccard  %retr_chg  %pred_chg %correct_chg  sacr_acc sgqms_acc
+     1       1.0000       0.0%       0.0%         0.0%    0.4490    0.4490
+     2       1.0000       0.0%       0.0%         0.0%    0.4490    0.4490
+     3       1.0000       0.0%       0.0%         0.0%    0.4490    0.4490
+     4       0.8350      44.0%      10.0%         8.0%    0.4490    0.4490
+     5       0.8350      44.0%      10.0%         8.0%    0.4490    0.4490
+     6       0.8350      44.0%      10.0%         8.0%    0.4490    0.4490
+     7       0.8350      44.0%      10.0%         8.0%    0.4490    0.4490
+     8       0.8350      44.0%      10.0%         8.0%    0.4490    0.4490
+     9       0.8350      44.0%      10.0%         8.0%    0.4490    0.4490
+    10       0.8350      44.0%      10.0%         8.0%    0.4490    0.4490
+    11       0.8350      44.0%      10.0%         8.0%    0.4490    0.4490
+    12       0.8350      44.0%      10.0%         8.0%    0.4490    0.4490
+    13       0.8350      44.0%      10.0%         8.0%    0.4490    0.4490
+    14       0.8350      44.0%      10.0%         8.0%    0.4490    0.4490
+    15       0.8350      44.0%      10.0%         8.0%    0.4490    0.4490
+    16       0.8350      44.0%      10.0%         8.0%    0.4490    0.4490
+    17       0.8350      44.0%      10.0%         8.0%    0.4490    0.4490
+    18       0.8350      44.0%      10.0%         8.0%    0.4490    0.4490
+    19       0.8350      44.0%      10.0%         8.0%    0.4490    0.4490
+    20       0.8350      44.0%      10.0%         8.0%    0.4490    0.4490
+
+## 9. Overall (Cumulative) Results -- SACR
+
+Accuracy (covered, all 1000 rounds pooled -- descriptive only, see Section 12): 0.4490   Coverage: 0.9800
+Negative exposure: 0.1111   Alignment violations (state/context/joint): 0/0/0
+
+## 10. Overall (Cumulative) Results -- SG-QMS
+
+Accuracy (covered, pooled): 0.4490   Coverage: 0.9800
+Negative exposure: 0.0174   Alignment violations (state/context/joint): 0/0/0
+Quarantined: 28   Downgraded: 28   Retention: 0.8959
+
+## 11. Governance Activity (Final State)
+
+Distinct memories touched: 269
+Final quarantined set size: 28   Final downgraded: 28
+Final memory retention: 0.8959
+All 28 quarantines carry a populated, auditable quarantine_reason (matches RQ3's own H3 requirement): True
+
+## 12. Prediction Comparison
+
+Per the interpretation rule for this report, mechanism activity (Section 11) and downstream
+prediction (this section) are reported as separate questions -- governance firing does not,
+by itself, imply a prediction-accuracy effect.
+Pooled descriptive counts across all 1000 rounds (NOT an independent-samples test --
+the same 50 patients recur 20x; see Section 13 for valid inference):
+  both_correct=406  both_wrong=526  sg_qms_correct_sacr_wrong=34  sg_qms_wrong_sacr_correct=34
+
+## 13. Statistical Analysis
+
+STATISTICAL DESIGN NOTE: the same 50 held-out patients recur every cycle. Pooling all
+1000 rounds as independent samples would be pseudo-replication and was NOT done for
+inference (Section 12's pooled counts are descriptive only). Two valid designs are used:
+
+(a) PER-CYCLE McNemar (n=50 distinct patients per cycle, a valid paired design):
+    cycle  1: a_only=0 b_only=0 n_discordant=0 p=N/A (0 discordant pairs)
+    cycle  2: a_only=0 b_only=0 n_discordant=0 p=N/A (0 discordant pairs)
+    cycle  3: a_only=0 b_only=0 n_discordant=0 p=N/A (0 discordant pairs)
+    cycle  4: a_only=2 b_only=2 n_discordant=4 p=1
+    cycle  5: a_only=2 b_only=2 n_discordant=4 p=1
+    cycle  6: a_only=2 b_only=2 n_discordant=4 p=1
+    cycle  7: a_only=2 b_only=2 n_discordant=4 p=1
+    cycle  8: a_only=2 b_only=2 n_discordant=4 p=1
+    cycle  9: a_only=2 b_only=2 n_discordant=4 p=1
+    cycle 10: a_only=2 b_only=2 n_discordant=4 p=1
+    cycle 11: a_only=2 b_only=2 n_discordant=4 p=1
+    cycle 12: a_only=2 b_only=2 n_discordant=4 p=1
+    cycle 13: a_only=2 b_only=2 n_discordant=4 p=1
+    cycle 14: a_only=2 b_only=2 n_discordant=4 p=1
+    cycle 15: a_only=2 b_only=2 n_discordant=4 p=1
+    cycle 16: a_only=2 b_only=2 n_discordant=4 p=1
+    cycle 17: a_only=2 b_only=2 n_discordant=4 p=1
+    cycle 18: a_only=2 b_only=2 n_discordant=4 p=1
+    cycle 19: a_only=2 b_only=2 n_discordant=4 p=1
+    cycle 20: a_only=2 b_only=2 n_discordant=4 p=1
+
+(b) CYCLE-LEVEL Wilcoxon signed-rank (n=20 cycles, cycle is the unit of replication,
+    not pseudo-replicated):
+    accuracy_covered: statistic=N/A  p=N/A  rank-biserial r=N/A  (n_nonzero_cycle_diffs=0)
+    negative_exposure: statistic=0.0000  p=0.0001047  rank-biserial r=-1.0000  (n_nonzero_cycle_diffs=17)
+
+No test was dropped, substituted, or re-run after inspecting results.
+
+## 14. Safety Invariant Results
+
+State violations (pooled, both conditions, all 1000 rounds): 0
+Context violations: 0   Joint violations: 0
+RQ2 alignment invariant preserved: True
+
+## 15. Leakage Checks
+
+Held-out patients absent from memory pool: True
+No held-out memory_id ever retrieved: True
+Same repeated query sequence used by both conditions: True
+
+## 16. Limitations
+
+- This is a controlled repeated-EXPOSURE simulation (see Critical Feedback Caveat), not a
+  simulation of genuinely new, independent clinical events -- quarantine dynamics here are
+  deterministic given each memory's fixed historical feedback sign.
+- Only 50 held-out patients are used; results are a mechanism stress-test on this specific
+  fixed subset, not a claim about the full held-out population (see RQ4-final for that).
+- Per-cycle McNemar tests (n=50) are individually low-powered; the cycle-level test (n=20
+  cycles) trades query-level detail for a valid, non-pseudo-replicated unit of analysis.
+- SACR's own trajectory across cycles is unconstrained (no governance), so any oracle-style
+  effectiveness/false-quarantine comparison inherits the same caveat documented in RQ3/RQ4-final.
+- Single deterministic seed/order (42) and one fixed query subset; a different subset of 50
+  patients could show different specific memories reaching quarantine, though the underlying
+  deterministic mechanism (Critical Feedback Caveat) would apply identically.
+
+## 17. Reproducibility Information
+
+experiment_id: RQ4B_20260916T063201Z
+timestamp: 2026-09-16T06:34:53.218798+00:00
+python_version: 3.9.23
+platform: macOS-15.6.1-arm64-arm-64bit
+git_commit: e4753fd
+random_seed: 42
+k_queries: 50
+cycles: 20
+total_rounds: 1000
+n_min: 3
+beta: -0.2
+alpha: 0.1
+downgrade_threshold: 0.4
+state_threshold: 0.7
+context_threshold: 0.9
+top_k: 5
+candidate_k: 100
+elapsed_seconds_total: 171.85887789726257
+
+Safety checks:
+  held_out_patients_absent_from_memory_pool: True
+  no_heldout_memory_id_ever_retrieved: True
+  same_queries_all_conditions: True
+  sacr_state_threshold_frozen: True
+  ranking_weights_frozen: True
+  sg_qms_uses_frozen_rq3_params: True
+  rq2_alignment_invariant: {'state_violations': 0, 'context_violations': 0, 'joint_violations': 0, 'preserved': True}
+  regression_checks_passed: True
+  frozen_dirs_unchanged: {'rq1': True, 'rq2': True, 'rq3': True}
+  previous_rq4_results_preserved: {'rq4': True, 'rq4_sequential': True, 'rq4_final': True}
+  deterministic_sequence_reproducible: True
+
+## 18. Final RQ4-B Interpretation
+
+- Individual-query correctness DID change with governance active, but symmetrically in both directions: pooled across all 1000 rounds, 34 queries became correct under SG-QMS that were wrong under SACR, while 34 became wrong that were correct under SACR -- netting to zero aggregate accuracy difference. This is a genuine mixed effect at the query level, not the absence of an effect; the cycle-level accuracy test found 0 of the 20 cycles with any accuracy difference at all (N/A p-value: test is undefined/uninformative when there is no variation to test). Do not read this as either 'SG-QMS improves' or 'SG-QMS is neutral' -- it measurably redistributes which specific patients are predicted correctly, without a net gain or loss.
+
+Governance activation: CONFIRMED.
+Retrieval-set change vs. SACR: OBSERVED.
+Prediction change vs. SACR: OBSERVED.
+Correctness change vs. SACR: OBSERVED (unchanged).
+Safety invariant (RQ2 state/context/joint eligibility): HELD across all 1000 rounds of both conditions.
+
+This report does not claim SG-QMS 'improves' or 'fails' as a general matter -- it reports
+what this specific controlled repeated-exposure design produced, on its own terms.

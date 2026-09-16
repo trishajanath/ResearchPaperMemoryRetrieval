@@ -1,0 +1,30 @@
+experiment_id: RQ4B_20260916T063201Z
+k_queries: 50
+cycles: 20
+total_rounds: 1000
+pre_committed_design_statement: K_QUERIES=50 and CYCLES=20 were fixed before this experiment ran and were not adjusted after inspecting results.
+feedback_caveat: Each memory's feedback is a fixed historical attribute; repeated retrieval returns the identical historical value every time. This experiment is a controlled repeated-exposure simulation of already-recorded historical outcomes, not new independent environmental feedback.
+timestamp: 2026-09-16T06:34:53.218798+00:00
+python_version: 3.9.23
+platform: macOS-15.6.1-arm64-arm-64bit
+git_commit: e4753fd
+random_seed: 42
+state_threshold: 0.7
+context_threshold: 0.9
+lambda_semantic: 0.6
+lambda_context: 0.25
+lambda_experience: 0.15
+top_k: 5
+candidate_k: 100
+n_min: 3
+beta: -0.2
+alpha: 0.1
+downgrade_threshold: 0.4
+feedback_mapping: {'NO': 1.0, '>30': 0.0, '<30': -1.0}
+original_rq4_results_dir: /Users/trishajanath/DiabetesMemory/results/rq4
+rq4_sequential_results_dir: /Users/trishajanath/DiabetesMemory/results/rq4_sequential
+rq4_final_results_dir: /Users/trishajanath/DiabetesMemory/results/rq4_final
+elapsed_seconds_by_condition: {'sacr': 85.25264883041382, 'sg_qms': 85.97893810272217}
+elapsed_seconds_total: 171.85887789726257
+all_safety_checks_pass: True
+pooled_descriptive_counts: {'both_correct': 406, 'both_wrong': 526, 'sg_qms_correct_sacr_wrong': 34, 'sg_qms_wrong_sacr_correct': 34}

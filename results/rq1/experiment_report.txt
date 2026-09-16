@@ -1,0 +1,568 @@
+============================================================
+RQ1 -- SACR STATE-AWARE RETRIEVAL EXPERIMENT
+============================================================
+
+## Research Question
+
+Can state-aware retrieval reduce the retrieval of semantically
+relevant but state-misaligned experiences compared with
+conventional semantic retrieval?
+
+## Experimental Setup
+
+Dataset: UCI Diabetes 130-US Hospitals (1999-2008)
+Number of memories: 101766
+Number of query scenarios (pairs): 20
+Number of query instances per condition (base+shifted): 40
+Retrieval K: 5
+SACR candidate pool size: 100
+State alignment threshold: 0.7
+SACR weights: semantic=0.6 context=0.25 experience=0.15
+Random seed: 42
+State-shuffle seed: 42
+Embedding model: all-MiniLM-L6-v2
+
+------------------------------------------------------------
+EXPERIMENT A -- NORMAL MEMORY BANK
+------------------------------------------------------------
+
+Baseline:
+  Mean state alignment: 0.779498
+  Minimum state alignment: 0.492965
+  Misaligned memories: 77
+  Total retrieved: 200
+  Misalignment rate: 38.50%
+
+SACR:
+  Mean state alignment: 0.852977
+  Minimum state alignment: 0.703008
+  Misaligned memories: 0
+  Total retrieved: 200
+  Misalignment rate: 0.00%
+
+SACR improvement (mean alignment): +0.073479
+SACR improvement (misalignment rate): -38.50%
+
+------------------------------------------------------------
+EXPERIMENT B -- STATE-SHUFFLED MEMORY BANK
+------------------------------------------------------------
+
+What was shuffled: for every memory, CONTEXT_COLS and EXPERIENCE_COLS,
+plus outcome/governance columns (readmitted, feedback, quality_score,
+quarantined, memory_id), were left exactly as in the original record.
+The STATE_COLS tuple (age, gender, race, number_outpatient,
+number_emergency, number_inpatient, number_diagnoses) was replaced,
+as a complete tuple, with another real memory's STATE_COLS tuple, via
+one fixed random permutation (np.random.default_rng(42)) over all
+memory rows. Every substituted state is therefore still a real,
+internally-consistent patient state -- it now just belongs to the
+wrong record -- deliberately decoupling state from the semantic/
+contextual content used for retrieval. memory_df is not mutated;
+embeddings are unaffected because they are built from state-neutral
+text (CONTEXT_COLS + EXPERIENCE_COLS only).
+
+Baseline:
+  Mean state alignment: 0.696898
+  Minimum state alignment: 0.481113
+  Misaligned memories: 122
+  Total retrieved: 200
+  Misalignment rate: 61.00%
+
+SACR:
+  Mean state alignment: 0.814685
+  Minimum state alignment: 0.701361
+  Misaligned memories: 0
+  Total retrieved: 200
+  Misalignment rate: 0.00%
+
+SACR improvement (mean alignment): +0.117786
+SACR improvement (misalignment rate): -61.00%
+
+------------------------------------------------------------
+SIDE-BY-SIDE SUMMARY
+------------------------------------------------------------
+
+Condition                           Baseline          SACR
+Normal mean alignment                 0.7795        0.8530
+Normal misalignment rate             38.50%         0.00%
+Shuffled mean alignment               0.6969        0.8147
+Shuffled misalignment rate           61.00%         0.00%
+
+Paired comparison (per query instance, SACR - baseline mean alignment):
+  normal: n=40  mean_diff=0.073479  median_diff=0.070288  std_diff=0.054541  95% CI=(0.056036, 0.090922)
+    paired t-test: t=8.5207, p=1.939e-10   Wilcoxon signed-rank: W=21.0000, p=2.611e-07
+  shuffled: n=40  mean_diff=0.117786  median_diff=0.117143  std_diff=0.061313  95% CI=(0.098178, 0.137395)
+    paired t-test: t=12.1499, p=7.831e-15   Wilcoxon signed-rank: W=0.0000, p=1.819e-12
+
+Test choice: a paired t-test (parametric) and a Wilcoxon signed-rank test
+(non-parametric, no normality assumption) are both reported because each
+query instance yields exactly one baseline and one SACR mean-alignment
+value -- a natural pairing. Agreement between the two is the more
+conservative basis for any claim of a real difference.
+No significance test is reported for misalignment COUNTS: SACR's hard
+threshold drives its count to (near) zero, which makes a count-based
+test degenerate; raw counts/rates are reported above instead.
+
+------------------------------------------------------------
+BASE -> SHIFTED ANALYSIS (secondary / sensitivity analysis)
+------------------------------------------------------------
+
+Caveat: the query's semantic text is state-neutral (CONTEXT_COLS +
+EXPERIENCE_COLS only), so BASE and SHIFTED share identical text and the
+baseline retriever returns the SAME memories for both versions of a
+pair. The 'shift drop' below therefore reflects only whether the
+shifted state happens to be farther from that fixed retrieved set, not
+a genuine re-retrieval failure. It is NOT direct causal evidence that
+the retriever 'got worse' -- Experiments A and B above are the primary
+evidence for RQ1.
+
+Mean baseline shift drop (normal condition): 0.013130
+Mean SACR shift drop (normal condition): -0.002565
+
+Q001
+  BASE
+    Baseline average alignment: 0.902041
+    Baseline minimum alignment: 0.834014
+    Baseline misaligned: 0/5
+    SACR average alignment: 0.828571
+    SACR minimum alignment: 0.714286
+    SACR misaligned: 0/5
+
+  SHIFTED
+    Baseline average alignment: 0.866667
+    Baseline minimum alignment: 0.816327
+    Baseline misaligned: 0/5
+    SACR average alignment: 0.873469
+    SACR minimum alignment: 0.816327
+    SACR misaligned: 0/5
+
+    Baseline shift drop: 0.035374
+    SACR shift drop: -0.044898
+
+Q002
+  BASE
+    Baseline average alignment: 0.835510
+    Baseline minimum alignment: 0.691837
+    Baseline misaligned: 1/5
+    SACR average alignment: 0.926939
+    SACR minimum alignment: 0.819048
+    SACR misaligned: 0/5
+
+  SHIFTED
+    Baseline average alignment: 0.827991
+    Baseline minimum alignment: 0.684318
+    Baseline misaligned: 1/5
+    SACR average alignment: 0.919420
+    SACR minimum alignment: 0.811529
+    SACR misaligned: 0/5
+
+    Baseline shift drop: 0.007519
+    SACR shift drop: 0.007519
+
+Q003
+  BASE
+    Baseline average alignment: 0.811837
+    Baseline minimum alignment: 0.655782
+    Baseline misaligned: 2/5
+    SACR average alignment: 0.868980
+    SACR minimum alignment: 0.792517
+    SACR misaligned: 0/5
+
+  SHIFTED
+    Baseline average alignment: 0.828980
+    Baseline minimum alignment: 0.684354
+    Baseline misaligned: 2/5
+    SACR average alignment: 0.886122
+    SACR minimum alignment: 0.821088
+    SACR misaligned: 0/5
+
+    Baseline shift drop: -0.017143
+    SACR shift drop: -0.017143
+
+Q004
+  BASE
+    Baseline average alignment: 0.752653
+    Baseline minimum alignment: 0.545578
+    Baseline misaligned: 2/5
+    SACR average alignment: 0.838367
+    SACR minimum alignment: 0.821769
+    SACR misaligned: 0/5
+
+  SHIFTED
+    Baseline average alignment: 0.809796
+    Baseline minimum alignment: 0.688435
+    Baseline misaligned: 1/5
+    SACR average alignment: 0.838367
+    SACR minimum alignment: 0.821769
+    SACR misaligned: 0/5
+
+    Baseline shift drop: -0.057143
+    SACR shift drop: 0.000000
+
+Q005
+  BASE
+    Baseline average alignment: 0.722177
+    Baseline minimum alignment: 0.545578
+    Baseline misaligned: 4/5
+    SACR average alignment: 0.815374
+    SACR minimum alignment: 0.707483
+    SACR misaligned: 0/5
+
+  SHIFTED
+    Baseline average alignment: 0.694966
+    Baseline minimum alignment: 0.518367
+    Baseline misaligned: 4/5
+    SACR average alignment: 0.862922
+    SACR minimum alignment: 0.785034
+    SACR misaligned: 0/5
+
+    Baseline shift drop: 0.027211
+    SACR shift drop: -0.047547
+
+Q006
+  BASE
+    Baseline average alignment: 0.783426
+    Baseline minimum alignment: 0.648460
+    Baseline misaligned: 2/5
+    SACR average alignment: 0.834551
+    SACR minimum alignment: 0.780272
+    SACR misaligned: 0/5
+
+  SHIFTED
+    Baseline average alignment: 0.775908
+    Baseline minimum alignment: 0.640942
+    Baseline misaligned: 2/5
+    SACR average alignment: 0.827032
+    SACR minimum alignment: 0.772753
+    SACR misaligned: 0/5
+
+    Baseline shift drop: 0.007519
+    SACR shift drop: 0.007519
+
+Q007
+  BASE
+    Baseline average alignment: 0.834830
+    Baseline minimum alignment: 0.676190
+    Baseline misaligned: 1/5
+    SACR average alignment: 0.863946
+    SACR minimum alignment: 0.819048
+    SACR misaligned: 0/5
+
+  SHIFTED
+    Baseline average alignment: 0.838639
+    Baseline minimum alignment: 0.714286
+    Baseline misaligned: 0/5
+    SACR average alignment: 0.863946
+    SACR minimum alignment: 0.824490
+    SACR misaligned: 0/5
+
+    Baseline shift drop: -0.003810
+    SACR shift drop: 0.000000
+
+Q008
+  BASE
+    Baseline average alignment: 0.698632
+    Baseline minimum alignment: 0.535535
+    Baseline misaligned: 3/5
+    SACR average alignment: 0.786420
+    SACR minimum alignment: 0.707125
+    SACR misaligned: 0/5
+
+  SHIFTED
+    Baseline average alignment: 0.698632
+    Baseline minimum alignment: 0.535535
+    Baseline misaligned: 3/5
+    SACR average alignment: 0.843562
+    SACR minimum alignment: 0.707125
+    SACR misaligned: 0/5
+
+    Baseline shift drop: 0.000000
+    SACR shift drop: -0.057143
+
+Q009
+  BASE
+    Baseline average alignment: 0.649509
+    Baseline minimum alignment: 0.520175
+    Baseline misaligned: 4/5
+    SACR average alignment: 0.855782
+    SACR minimum alignment: 0.805442
+    SACR misaligned: 0/5
+
+  SHIFTED
+    Baseline average alignment: 0.622299
+    Baseline minimum alignment: 0.492965
+    Baseline misaligned: 4/5
+    SACR average alignment: 0.828571
+    SACR minimum alignment: 0.778231
+    SACR misaligned: 0/5
+
+    Baseline shift drop: 0.027211
+    SACR shift drop: 0.027211
+
+Q010
+  BASE
+    Baseline average alignment: 0.761618
+    Baseline minimum alignment: 0.658826
+    Baseline misaligned: 3/5
+    SACR average alignment: 0.879681
+    SACR minimum alignment: 0.787075
+    SACR misaligned: 0/5
+
+  SHIFTED
+    Baseline average alignment: 0.754100
+    Baseline minimum alignment: 0.651307
+    Baseline misaligned: 3/5
+    SACR average alignment: 0.872163
+    SACR minimum alignment: 0.779556
+    SACR misaligned: 0/5
+
+    Baseline shift drop: 0.007519
+    SACR shift drop: 0.007519
+
+Q011
+  BASE
+    Baseline average alignment: 0.855743
+    Baseline minimum alignment: 0.704762
+    Baseline misaligned: 0/5
+    SACR average alignment: 0.855743
+    SACR minimum alignment: 0.704762
+    SACR misaligned: 0/5
+
+  SHIFTED
+    Baseline average alignment: 0.872886
+    Baseline minimum alignment: 0.676190
+    Baseline misaligned: 1/5
+    SACR average alignment: 0.907172
+    SACR minimum alignment: 0.831096
+    SACR misaligned: 0/5
+
+    Baseline shift drop: -0.017143
+    SACR shift drop: -0.051429
+
+Q012
+  BASE
+    Baseline average alignment: 0.780816
+    Baseline minimum alignment: 0.675510
+    Baseline misaligned: 2/5
+    SACR average alignment: 0.848027
+    SACR minimum alignment: 0.714286
+    SACR misaligned: 0/5
+
+  SHIFTED
+    Baseline average alignment: 0.752245
+    Baseline minimum alignment: 0.675510
+    Baseline misaligned: 3/5
+    SACR average alignment: 0.819456
+    SACR minimum alignment: 0.714286
+    SACR misaligned: 0/5
+
+    Baseline shift drop: 0.028571
+    SACR shift drop: 0.028571
+
+Q013
+  BASE
+    Baseline average alignment: 0.807619
+    Baseline minimum alignment: 0.666667
+    Baseline misaligned: 2/5
+    SACR average alignment: 0.904762
+    SACR minimum alignment: 0.838095
+    SACR misaligned: 0/5
+
+  SHIFTED
+    Baseline average alignment: 0.759284
+    Baseline minimum alignment: 0.618332
+    Baseline misaligned: 2/5
+    SACR average alignment: 0.856427
+    SACR minimum alignment: 0.789760
+    SACR misaligned: 0/5
+
+    Baseline shift drop: 0.048335
+    SACR shift drop: 0.048335
+
+Q014
+  BASE
+    Baseline average alignment: 0.757136
+    Baseline minimum alignment: 0.651182
+    Baseline misaligned: 3/5
+    SACR average alignment: 0.870333
+    SACR minimum alignment: 0.794039
+    SACR misaligned: 0/5
+
+  SHIFTED
+    Baseline average alignment: 0.750061
+    Baseline minimum alignment: 0.640297
+    Baseline misaligned: 3/5
+    SACR average alignment: 0.870877
+    SACR minimum alignment: 0.792678
+    SACR misaligned: 0/5
+
+    Baseline shift drop: 0.007075
+    SACR shift drop: -0.000544
+
+Q015
+  BASE
+    Baseline average alignment: 0.783810
+    Baseline minimum alignment: 0.682313
+    Baseline misaligned: 2/5
+    SACR average alignment: 0.802857
+    SACR minimum alignment: 0.714286
+    SACR misaligned: 0/5
+
+  SHIFTED
+    Baseline average alignment: 0.808299
+    Baseline minimum alignment: 0.641497
+    Baseline misaligned: 1/5
+    SACR average alignment: 0.876054
+    SACR minimum alignment: 0.758503
+    SACR misaligned: 0/5
+
+    Baseline shift drop: -0.024490
+    SACR shift drop: -0.073197
+
+Q016
+  BASE
+    Baseline average alignment: 0.843874
+    Baseline minimum alignment: 0.555943
+    Baseline misaligned: 1/5
+    SACR average alignment: 0.872653
+    SACR minimum alignment: 0.812245
+    SACR misaligned: 0/5
+
+  SHIFTED
+    Baseline average alignment: 0.723573
+    Baseline minimum alignment: 0.552184
+    Baseline misaligned: 2/5
+    SACR average alignment: 0.809352
+    SACR minimum alignment: 0.706767
+    SACR misaligned: 0/5
+
+    Baseline shift drop: 0.120301
+    SACR shift drop: 0.063301
+
+Q017
+  BASE
+    Baseline average alignment: 0.794182
+    Baseline minimum alignment: 0.697279
+    Baseline misaligned: 2/5
+    SACR average alignment: 0.843058
+    SACR minimum alignment: 0.802041
+    SACR misaligned: 0/5
+
+  SHIFTED
+    Baseline average alignment: 0.762889
+    Baseline minimum alignment: 0.625170
+    Baseline misaligned: 2/5
+    SACR average alignment: 0.835711
+    SACR minimum alignment: 0.787755
+    SACR misaligned: 0/5
+
+    Baseline shift drop: 0.031293
+    SACR shift drop: 0.007347
+
+Q018
+  BASE
+    Baseline average alignment: 0.847619
+    Baseline minimum alignment: 0.666667
+    Baseline misaligned: 1/5
+    SACR average alignment: 0.872245
+    SACR minimum alignment: 0.799320
+    SACR misaligned: 0/5
+
+  SHIFTED
+    Baseline average alignment: 0.864912
+    Baseline minimum alignment: 0.703008
+    Baseline misaligned: 0/5
+    SACR average alignment: 0.864776
+    SACR minimum alignment: 0.703008
+    SACR misaligned: 0/5
+
+    Baseline shift drop: -0.017293
+    SACR shift drop: 0.007469
+
+Q019
+  BASE
+    Baseline average alignment: 0.727347
+    Baseline minimum alignment: 0.545578
+    Baseline misaligned: 2/5
+    SACR average alignment: 0.827755
+    SACR minimum alignment: 0.793197
+    SACR misaligned: 0/5
+
+  SHIFTED
+    Baseline average alignment: 0.735510
+    Baseline minimum alignment: 0.525170
+    Baseline misaligned: 2/5
+    SACR average alignment: 0.843537
+    SACR minimum alignment: 0.772789
+    SACR misaligned: 0/5
+
+    Baseline shift drop: -0.008163
+    SACR shift drop: -0.015782
+
+Q020
+  BASE
+    Baseline average alignment: 0.770884
+    Baseline minimum alignment: 0.545578
+    Baseline misaligned: 2/5
+    SACR average alignment: 0.837855
+    SACR minimum alignment: 0.705603
+    SACR misaligned: 0/5
+
+  SHIFTED
+    Baseline average alignment: 0.711020
+    Baseline minimum alignment: 0.511565
+    Baseline misaligned: 2/5
+    SACR average alignment: 0.786259
+    SACR minimum alignment: 0.768707
+    SACR misaligned: 0/5
+
+    Baseline shift drop: 0.059864
+    SACR shift drop: 0.051597
+
+------------------------------------------------------------
+INTERPRETATION
+------------------------------------------------------------
+
+1. Evidence supporting SACR's state-alignment property:
+   - Normal condition: SACR misalignment rate 0.00% vs baseline 38.50% (0 vs 77 misaligned out of 200).
+   - Shuffled condition: SACR misalignment rate 0.00% vs baseline 61.00% (0 vs 122 misaligned out of 200).
+   - Paired mean-alignment improvement is +0.0735 (normal, t p=1.939e-10, Wilcoxon p=2.611e-07) and +0.1178 (shuffled, t p=7.831e-15, Wilcoxon p=1.819e-12).
+
+2. Evidence about baseline vulnerability:
+   - Baseline misalignment rate: 38.50% (normal) -> 61.00% (shuffled), i.e. when state was deliberately decoupled from semantic/contextual content.
+   - This is consistent with RQ1: a semantic-only retriever cannot detect that
+     state has been decoupled from content, so it keeps retrieving the same
+     semantically-plausible memories even once they are state-incompatible.
+
+3. Limitations of this experiment:
+   - STATE_COLS alignment is a graded average over 3 categorical and 4 numeric
+     fields; because most numeric STATE_COLS values cluster near zero across the
+     dataset, even a randomly assigned state can exceed the 0.70 threshold by
+     chance, which caps how large the shuffled-vs-normal gap can get.
+   - The BASE->SHIFTED analysis is confounded by state-neutral query text (see
+     above) and is reported only as a secondary/sensitivity check.
+   - The 20 query scenarios are sampled once (seed 42) from the real memory bank;
+     results may shift somewhat under a different sample, though the mechanism
+     being tested (hard state filter vs. no filter) does not depend on that sample.
+
+------------------------------------------------------------
+REPRODUCIBILITY
+------------------------------------------------------------
+
+Random seed: 42
+State-shuffle seed: 42
+Files generated:
+  results/rq1/query_results.csv
+  results/rq1/retrieved_memories.csv
+  results/rq1/state_shuffle_results.csv
+  results/rq1/rq1_summary.csv
+  results/rq1/aggregate_results.csv
+  results/rq1/experiment_metadata.json
+  results/rq1/test_queries.json
+  results/rq1/experiment_report.txt
+Embedding file: data/baseline_embeddings.npy (state-neutral text)
+Dataset cache: data/diabetic_data_raw.pkl
+Timestamp: 2026-09-14T17:58:06.822751+00:00
+Git commit: e4753fd
+Python version: 3.9.23
+

@@ -1,0 +1,14 @@
+{
+    "experiment": "RQ1",
+    "description": "Baseline semantic retrieval vs SACR under controlled state shifts",
+    "top_k": 5,
+    "candidate_k": 100,
+    "state_alignment_threshold": 0.7,
+    "semantic_weight": 0.6,
+    "context_weight": 0.25,
+    "experience_weight": 0.15,
+    "number_of_query_pairs": 20,
+    "random_seed": 42,
+    "timestamp": "2026-09-14T15:16:48.966291+00:00",
+    "number_of_memories": 101766
+}

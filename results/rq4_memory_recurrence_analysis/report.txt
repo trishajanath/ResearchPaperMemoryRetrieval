@@ -1,0 +1,68 @@
+RQ4 MEMORY-RECURRENCE ANALYSIS (analysis-only, pre-OGMM, no RQ1-4 changes)
+========================================================================================
+Queries run: 20372 (one per held-out encounter, uncapped)
+Elapsed: 1701.1s
+Total retrieval events (n_queries * up to top_k): 93067
+Distinct memories retrieved: 50191
+
+-- Recurrence counts --
+  retrieved exactly once:  25058
+  retrieved  > 1 time:     25133
+  retrieved >= 3 times:    11007
+  retrieved >= 5 times:    1603
+  retrieved >= 10 times:   5
+  retrieved >= 20 times:   0
+  max retrieval count:     10
+  mean retrieval count:    1.854
+  median retrieval count:  2.000
+
+-- Retrieval count distribution (bucketed) --
+       1-1: 25058
+       2-2: 14126
+       3-3: 6677
+       4-4: 2727
+       5-5: 1039
+       6-7: 508
+       8-9: 51
+     10-14: 5
+     15-19: 0
+     20-29: 0
+     30-49: 0
+     50-99: 0
+     >=100: 0
+
+-- Top 20 most-retrieved memories --
+  M074606: 10
+  M034828: 10
+  M045990: 10
+  M055079: 10
+  M086557: 10
+  M007134: 9
+  M013183: 9
+  M070162: 9
+  M097284: 9
+  M093008: 9
+  M050997: 9
+  M071371: 9
+  M076957: 9
+  M082812: 8
+  M087203: 8
+  M019941: 8
+  M062665: 8
+  M049095: 8
+  M031954: 8
+  M063458: 8
+
+-- Coverage --
+  queries retrieving full top_k (5): 17627
+  queries retrieving zero memories: 709
+  mean retrieved per query: 4.568
+
+-- Cross-reference against RQ3's frozen governance threshold (N_MIN=3, BETA=-0.2) --
+  distinct memories meeting N_MIN: 11007 (21.9% of distinct retrieved memories)
+  retrieval events from N_MIN-eligible memories: 39757 (42.7% of all events)
+  RQ4's own eval cap: 300 queries vs. this run's 20372 (1.5% of this run's volume)
+  RQ4's own evaluation runs only 300 queries (1.5% of this run's volume). The recurrence measured here is an upper bound on what RQ4's own eval could exploit, not a claim about what RQ4 actually observed at its own, much smaller, query cap.
+
+VERDICT
+MODEST NATURAL RECURRENCE, GATED BY SCALE: 11007 of 50191 distinct retrieved memories (21.9%) meet RQ3's frozen governance precondition (retrieved >= N_MIN=3 times), accounting for 42.7% of all retrieval events at this run's volume (20372 queries) -- but the single most-retrieved memory was only retrieved 10 times out of 20372 queries -- nowhere near a power-law-style hotspot pattern (no memory dominates; recurrence is mild and broadly spread, not concentrated). Critically, RQ4's own evaluation caps at 300 queries, only 1.5% of the volume used here, so RQ4's actual eval almost certainly sees far less repeat exposure than this scan shows -- this is an upper bound on organic recurrence, not evidence that RQ4's own results already reflect it. If a memory-recurrence RQ4 protocol is built, it needs a query volume closer to this run's scale (or explicit oversampling of high-recurrence patients) rather than RQ4's current 300-query cap, and should report recurrence as a modest, broadly-distributed effect -- not a hotspot/power-law effect, since none was observed.

@@ -1,0 +1,184 @@
+{
+  "purpose": "Analysis-only memory-recurrence study: measures how often the same memory_id is retrieved by SACR across a large, uncapped set of held-out queries, BEFORE any OGMM/governance runs, to determine whether the dataset naturally supports a memory-recurrence RQ4 protocol.",
+  "method": {
+    "split_source": "experiments_rq4.build_split() (frozen, unmodified)",
+    "retrieval_function": "sacr.sacr_retrieve() (frozen, unmodified)",
+    "condition": "equivalent to RQ4's 'sacr' condition -- no governance/OGMM applied",
+    "active_rules": {
+      "min_state_alignment": 0.7,
+      "min_context_alignment": 0.9
+    },
+    "context_threshold_source": "RQ2 frozen metadata",
+    "top_k": 5,
+    "candidate_k": 100,
+    "leakage_prevention": "held-out patients' own memory_ids excluded via excluded_memory_ids, same as RQ4",
+    "query_cap": "none (RQ4's own MAX_EVAL_QUERIES=300 cap is untouched and unused here)"
+  },
+  "split_info": {
+    "total_unique_patients": 71518,
+    "memory_pool_patients": 57214,
+    "heldout_patients": 14304,
+    "memory_pool_rows": 81394,
+    "heldout_rows": 20372,
+    "seed": 42,
+    "heldout_fraction_target": 0.2,
+    "memory_pool_class_distribution": {
+      "NO": 43902,
+      ">30": 28390,
+      "<30": 9102
+    },
+    "heldout_class_distribution": {
+      "NO": 10962,
+      ">30": 7155,
+      "<30": 2255
+    }
+  },
+  "elapsed_seconds": 1701.0717587471008,
+  "summary": {
+    "n_queries": 20372,
+    "total_retrieval_events": 93067,
+    "distinct_memories_retrieved": 50191,
+    "memories_retrieved_exactly_once": 25058,
+    "memories_retrieved_more_than_once": 25133,
+    "memories_retrieved_ge_3": 11007,
+    "memories_retrieved_ge_5": 1603,
+    "memories_retrieved_ge_10": 5,
+    "memories_retrieved_ge_20": 0,
+    "max_retrieval_count": 10,
+    "mean_retrieval_count": 1.8542567392560418,
+    "median_retrieval_count": 2.0,
+    "top_20_memories": [
+      {
+        "memory_id": "M074606",
+        "retrieval_count": 10
+      },
+      {
+        "memory_id": "M034828",
+        "retrieval_count": 10
+      },
+      {
+        "memory_id": "M045990",
+        "retrieval_count": 10
+      },
+      {
+        "memory_id": "M055079",
+        "retrieval_count": 10
+      },
+      {
+        "memory_id": "M086557",
+        "retrieval_count": 10
+      },
+      {
+        "memory_id": "M007134",
+        "retrieval_count": 9
+      },
+      {
+        "memory_id": "M013183",
+        "retrieval_count": 9
+      },
+      {
+        "memory_id": "M070162",
+        "retrieval_count": 9
+      },
+      {
+        "memory_id": "M097284",
+        "retrieval_count": 9
+      },
+      {
+        "memory_id": "M093008",
+        "retrieval_count": 9
+      },
+      {
+        "memory_id": "M050997",
+        "retrieval_count": 9
+      },
+      {
+        "memory_id": "M071371",
+        "retrieval_count": 9
+      },
+      {
+        "memory_id": "M076957",
+        "retrieval_count": 9
+      },
+      {
+        "memory_id": "M082812",
+        "retrieval_count": 8
+      },
+      {
+        "memory_id": "M087203",
+        "retrieval_count": 8
+      },
+      {
+        "memory_id": "M019941",
+        "retrieval_count": 8
+      },
+      {
+        "memory_id": "M062665",
+        "retrieval_count": 8
+      },
+      {
+        "memory_id": "M049095",
+        "retrieval_count": 8
+      },
+      {
+        "memory_id": "M031954",
+        "retrieval_count": 8
+      },
+      {
+        "memory_id": "M063458",
+        "retrieval_count": 8
+      }
+    ],
+    "retrieval_count_distribution": {
+      "bin_labels": [
+        "1-1",
+        "2-2",
+        "3-3",
+        "4-4",
+        "5-5",
+        "6-7",
+        "8-9",
+        "10-14",
+        "15-19",
+        "20-29",
+        "30-49",
+        "50-99",
+        ">=100"
+      ],
+      "bin_counts": [
+        25058,
+        14126,
+        6677,
+        2727,
+        1039,
+        508,
+        51,
+        5,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "coverage": {
+      "queries_with_full_top_k": 17627,
+      "queries_with_zero_retrieved": 709,
+      "mean_retrieved_per_query": 4.568378166110348
+    },
+    "governance_cross_reference": {
+      "source": "RQ3 frozen experiment_metadata.json (selected_n_min, selected_beta)",
+      "n_min": 3,
+      "beta": -0.2,
+      "distinct_memories_meeting_n_min": 11007,
+      "fraction_of_distinct_memories_meeting_n_min": 0.21930226534637684,
+      "retrieval_events_from_n_min_eligible_memories": 39757,
+      "fraction_of_events_from_n_min_eligible_memories": 0.4271868653765567,
+      "rq4_own_eval_cap": 300,
+      "this_run_queries": 20372,
+      "this_run_vs_rq4_cap_ratio": 67.90666666666667,
+      "note": "RQ4's own evaluation runs only 300 queries (1.5% of this run's volume). The recurrence measured here is an upper bound on what RQ4's own eval could exploit, not a claim about what RQ4 actually observed at its own, much smaller, query cap."
+    }
+  },
+  "verdict": "MODEST NATURAL RECURRENCE, GATED BY SCALE: 11007 of 50191 distinct retrieved memories (21.9%) meet RQ3's frozen governance precondition (retrieved >= N_MIN=3 times), accounting for 42.7% of all retrieval events at this run's volume (20372 queries) -- but the single most-retrieved memory was only retrieved 10 times out of 20372 queries -- nowhere near a power-law-style hotspot pattern (no memory dominates; recurrence is mild and broadly spread, not concentrated). Critically, RQ4's own evaluation caps at 300 queries, only 1.5% of the volume used here, so RQ4's actual eval almost certainly sees far less repeat exposure than this scan shows -- this is an upper bound on organic recurrence, not evidence that RQ4's own results already reflect it. If a memory-recurrence RQ4 protocol is built, it needs a query volume closer to this run's scale (or explicit oversampling of high-recurrence patients) rather than RQ4's current 300-query cap, and should report recurrence as a modest, broadly-distributed effect -- not a hotspot/power-law effect, since none was observed."
+}
