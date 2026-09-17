@@ -1,79 +1,18 @@
 # SG-QMS: State-Gated, Quality-Managed Memory Retrieval
 
-SG-QMS is a memory-augmented retrieval framework designed to make retrieved past experiences **state-compatible, contextually relevant, and quality-aware**. It is evaluated on the **UCI Diabetes 130-US Hospitals (1999–2008)** dataset (101,766 hospital encounters) through four research questions, moving progressively from **retrieval → safety → memory governance → downstream evaluation**:
+A memory-augmented retrieval system for outcome-proxy prediction on the **UCI Diabetes 130-US Hospitals** dataset (101,766 encounters). Four research questions test, in order: whether *smarter retrieval* beats semantic-only retrieval, whether that retrieval can be made *provably safe*, whether the memory bank can *govern itself* based on outcome feedback, and whether all of it together improves *downstream prediction*.
 
-1. **RQ1 — State-aware retrieval:** Does state-aware retrieval reduce the retrieval of experiences incompatible with the current patient state?
-2. **RQ2 — Retrieval safety:** Can state and contextual compatibility be enforced as explicit mathematical eligibility constraints, not just a statistical tendency?
-3. **RQ3 — Memory governance:** Can the memory bank automatically downgrade or quarantine repeatedly negative experiences using outcome feedback?
-4. **RQ4 — Downstream effect:** Does dynamic memory governance affect downstream prediction performance and negative-memory exposure?
+> `readmitted` is used throughout as an **outcome-derived experimental proxy**, not a causal or clinical ground truth. No claim here is a claim of clinical effectiveness or deployment readiness.
 
-> **Experimental proxy:** `readmitted` is converted into an outcome-derived feedback signal purely for experimentation. It is **not** causal evidence, clinical ground truth, or evidence of treatment effectiveness. Nothing here establishes clinical effectiveness or deployment readiness.
-
-## Dataset & Preprocessing
-
-**Raw encounters → missing-value handling → feature selection → state/context/experience construction → outcome-feedback construction → patient-level split → memory pool + held-out set**
+## Dataset
 
 | | |
 |---|---|
 | Raw size | 101,766 encounters × 48 columns |
-| Missing values | only `race`, `medical_specialty` → filled `"Unknown"` |
-| Features used | 17 of 48 (see table below); columns such as `discharge_disposition_id`, `payer_code`, `weight`, and the diagnosis/medication codes are left out — several of these sit close to the discharge/outcome pathway itself, so keeping them out of the retrieval features avoids a plausible leakage channel |
-| Patient split (seed 42) | 71,518 unique patients → 57,214 (memory pool, 81,394 rows) / 14,304 held out (20,372 rows) |
-
-The split is done **at the patient level**: every encounter belonging to a held-out patient is excluded from the memory pool, so the retrieval system can never see a held-out patient's own history during evaluation.
-
-### Feature roles
-
-| Group | Features | Used for |
-|---|---|---|
-| **State** | `age`, `gender`, `race`, `number_outpatient`, `number_emergency`, `number_inpatient`, `number_diagnoses` | *State alignment* — is this past patient compatible with the current one? (RQ1/RQ2 eligibility gate) |
-| **Context** | `admission_type_id`, `admission_source_id`, `time_in_hospital`, `medical_specialty`, `num_lab_procedures`, `num_procedures`, `num_medications` | *Context alignment* — is the care setting comparable? (RQ2 eligibility gate, retrieval ranking) |
-| **Experience** | `insulin`, `change`, `diabetesMed` | *Experience match* — what treatment action did this memory involve? (retrieval ranking) |
-| **Outcome** | `readmitted` (`NO` / `>30` / `<30`) | Downstream prediction target, and mapped to **feedback** for governance: `NO`→+1.0, `>30`→0.0, `<30`→−1.0 |
-
-```
-Encounter → [STATE, CONTEXT, EXPERIENCE] → SACR → Retrieved memories
-                                                        │
-                                              outcome-derived feedback
-                                                        ▼
-                                                      OGMM
-                                                 ┌──────┴──────┐
-                                              Retain     Downgrade / Quarantine
-```
-
-State and context govern **retrieval safety and alignment** (is this memory even eligible?); experience describes **what happened** in an eligible memory. This separation lets the system check *relevance* before it uses *history* — instead of leaning on text similarity alone.
-
-## Metrics & Formulas
-
-Every number in the tables below comes from one of these definitions — no metric here is a black box.
-
-**Alignment scores** (used for eligibility gates and ranking): for a query `q` and memory `m`,
-```
-similarity(q_i, m_i) = 1 if q_i == m_i                        (categorical field)
-                      = 1 − |q_i − m_i| / range(field)          (numeric field)
-state_alignment(q, m)   = mean(similarity over the 7 STATE fields)
-context_alignment(q, m) = mean(similarity over the 7 CONTEXT fields)
-```
-**Misalignment rate** = share of retrieved memories with `state_alignment < 0.70` (the frozen threshold).
-**Eligibility (RQ2)** = a memory is even retrievable only if `state_alignment ≥ 0.70` **and** `context_alignment ≥ 0.90`.
-**Coverage** = share of queries that had ≥1 eligible memory retrieved at all. **Accuracy (covered)** = accuracy computed only over those covered queries.
-
-**Negative exposure** = `(# retrieved memories with feedback < 0) / (total memories retrieved)` — measured over every retrieval, across all queries.
-**Negative-query rate** = `(# queries with ≥1 negative memory in their retrieved set) / (# covered queries)` — measured per query instead of per retrieval.
-
-**Quality score** (OGMM, per memory, starts at 0.5): updated every time the memory is retrieved,
-```
-quality_score ← clip(quality_score + ALPHA × feedback, 0, 1),   ALPHA = 0.1
-```
-**Downgrade**: a memory is downgraded the first time `quality_score < 0.4`.
-**Average utility** (per memory) = `(sum of feedback over every retrieval of that memory) / (retrieval_count)`.
-**Quarantine**: a memory is quarantined — permanently excluded from future retrieval — the first time both hold:
-```
-retrieval_count ≥ N_MIN (3)   AND   average_utility ≤ BETA (−0.2)
-```
-**Retention** = `(# memories touched by governance − # quarantined) / (# memories touched)` — the share of touched memories still fully available.
-**Quarantine effectiveness** = `|quarantined ∩ oracle-eligible| / |oracle-eligible|` — of the memories an unconstrained (no-governance) run would also have flagged, what fraction did we actually catch?
-**False-quarantine rate** = `|quarantined − oracle-eligible| / |quarantined|` — of what we quarantined, what fraction the oracle run would *not* have flagged?
+| Features used | 17: 7 state (age, gender, race, prior visit counts) + 7 context (admission, labs, meds) + 3 experience (insulin, med change, diabetes med) |
+| Missing values | only `race`, `medical_specialty` → filled "Unknown" |
+| Outcome → feedback | `NO`→+1.0, `>30`→0.0, `<30`→−1.0 |
+| Patient split (seed 42) | 71,518 unique patients → 57,214 (memory pool, 81,394 rows) / 14,304 held out (20,372 rows, never in the pool) |
 
 ## Research Questions
 
